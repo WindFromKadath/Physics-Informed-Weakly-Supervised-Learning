@@ -90,6 +90,18 @@ def regression_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict[str, floa
     }
 
 
+def _r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """[ENGINEERING] Diagnostic R^2; NaN when the target has zero variance."""
+
+    truth = np.asarray(y_true, dtype=float)
+    estimate = np.asarray(y_pred, dtype=float)
+    total = float(np.sum((truth - np.mean(truth)) ** 2))
+    if total <= 0.0:
+        return float("nan")
+    residual = float(np.sum((truth - estimate) ** 2))
+    return 1.0 - residual / total
+
+
 def nested_split_plan(
     max_samples: int,
     sample_sizes: Iterable[int],
@@ -402,6 +414,12 @@ def tune_pwl(
         "minimum_validation_mse": minimum_candidate.mse,
         "selection_threshold": selection_threshold,
         "eligible_candidates": len(eligible),
+        # [ENGINEERING] Stage-1 selection audit: rank of the selected
+        # candidate among valid candidates ordered by validation MSE (1-based).
+        "selected_rank_by_validation_mse": 1 + sum(
+            1 for candidate in candidates if candidate.mse < selected.mse
+        ),
+        "n_valid_candidates": len(candidates),
     }
     if parallel_verbose:
         print(
@@ -411,39 +429,114 @@ def tune_pwl(
             flush=True,
         )
     if not bool(config.get("refit_on_train_validation", False)):
-        best_model = _make_pwl(
-            model_config, best_params, seed + selected.start_index
+        best_model = _reconstruct_selected(
+            data,
+            train_index,
+            model_config,
+            best_params,
+            seed,
+            selected,
+            require_convergence,
         )
-        best_model.fit(
-            data.x_ph[train_index],
-            data.x_pr[train_index],
-            data.y[train_index],
-            data.weak_x_ph,
-            data.weak_y,
-            theta_init=selected.theta_init,
-            physics_model=data.physics_model,
-        )
-        if require_convergence and not best_model.converged_:
-            raise RuntimeError(
-                "Selected PWL candidate did not converge when reconstructed."
-            )
         best_model.tuning_diagnostics_ = tuning_diagnostics
         return best_model, best_params, best_mse
 
     final_index = _scenario_indices(train_index, validation_index)
-    final = _make_pwl(model_config, best_params, seed)
+    # [ENGINEERING] Warm-start the refit from the selected candidate, matching
+    # the reconstruction branch above; a cold start intermittently fails the
+    # convergence criteria on the merged train+validation data.
+    final = _make_pwl(model_config, best_params, seed + selected.start_index)
     final.fit(
         data.x_ph[final_index],
         data.x_pr[final_index],
         data.y[final_index],
         data.weak_x_ph,
         data.weak_y,
+        theta_init=selected.theta_init,
         physics_model=data.physics_model,
     )
     if require_convergence and not final.converged_:
-        raise RuntimeError("Refitted PWL model did not satisfy convergence criteria.")
+        if _refit_objective_stagnated(final):
+            # [ENGINEERING] BCD can enter a 2-cycle between equivalent minima
+            # (typically theta at the box boundary): the objective flatlines
+            # while parameters keep oscillating above the parameter tolerance.
+            # Accept the refit only when the objective has genuinely stagnated
+            # and both inner ADMM solves converged; record the override.
+            tuning_diagnostics["refit_convergence_override"] = (
+                "objective_stagnation"
+            )
+        else:
+            # [ENGINEERING] Tiny merged refits can converge too slowly to meet
+            # the strict criteria within the iteration budget.  Fall back to
+            # the converged train-only reconstruction so the protocol keeps a
+            # valid model; the deviation is recorded per condition.
+            tuning_diagnostics["refit_convergence_override"] = (
+                "fallback_train_only"
+            )
+            final = _reconstruct_selected(
+                data,
+                train_index,
+                model_config,
+                best_params,
+                seed,
+                selected,
+                require_convergence,
+            )
     final.tuning_diagnostics_ = tuning_diagnostics
     return final, best_params, best_mse
+
+
+def _reconstruct_selected(
+    data: SimulationData,
+    train_index: np.ndarray,
+    model_config: dict[str, Any],
+    best_params: dict[str, float],
+    seed: int,
+    selected: "_PWLCandidateResult",
+    require_convergence: bool,
+) -> PWLRegressor:
+    """Rebuild the selected candidate on the training split only."""
+
+    model = _make_pwl(model_config, best_params, seed + selected.start_index)
+    model.fit(
+        data.x_ph[train_index],
+        data.x_pr[train_index],
+        data.y[train_index],
+        data.weak_x_ph,
+        data.weak_y,
+        theta_init=selected.theta_init,
+        physics_model=data.physics_model,
+    )
+    if require_convergence and not model.converged_:
+        raise RuntimeError(
+            "Selected PWL candidate did not converge when reconstructed."
+        )
+    return model
+
+
+def _refit_objective_stagnated(model: PWLRegressor, window: int = 5) -> bool:
+    """Return True when the refit objective flatlined without drift.
+
+    Requires the last iteration's inner solves to have converged, the final
+    relative objective change to be below the BCD tolerance, and the
+    objective range over the trailing ``window`` iterations to stay below the
+    same tolerance (oscillation without progress).
+    """
+
+    history = model.history_
+    if not history:
+        return False
+    last = history[-1]
+    if not (last.g_admm_converged and last.theta_admm_converged):
+        return False
+    tolerance = model.bcd_tolerance
+    if not (np.isfinite(last.objective) and last.relative_change < tolerance):
+        return False
+    tail = [record.objective for record in history[-window:]]
+    if not all(np.isfinite(tail)):
+        return False
+    spread = (max(tail) - min(tail)) / max(1.0, abs(float(np.mean(tail))))
+    return bool(spread < tolerance)
 
 
 def _metric_row(
@@ -536,6 +629,39 @@ def _fit_pwl_condition(
         data, train, validation, config, seed=seed
     )
     prediction = model.predict(data.test_x_ph, data.test_x_pr)
+    # [ENGINEERING] Stage-1 internal diagnostics (additive only).  They
+    # observe distillation quality, component magnitudes, and selection gaps
+    # without changing the fitted model or the tuning protocol.
+    features = model.features_
+    weak_physics_prediction = model.y_mean_ + model.y_scale_ * (
+        features.transform_h(data.weak_x_ph, model.theta_) @ model.g_
+    )
+    weak_distillation_r2 = _r_squared(data.weak_y, weak_physics_prediction)
+    train_prediction = model.predict(data.x_ph[train], data.x_pr[train])
+    labeled_prediction_r2 = _r_squared(data.y[train], train_prediction)
+    h_test = features.transform_h(data.test_x_ph, model.theta_)
+    b_test = features.transform_b(data.test_x_ph, data.test_x_pr)
+    physics_component_norm = float(
+        np.linalg.norm(model.y_scale_ * (h_test @ model.g_))
+    )
+    process_component_norm = float(
+        np.linalg.norm(model.y_scale_ * (b_test @ model.d_))
+    )
+    theta_boundary_hit = bool(
+        np.any(np.abs(model.theta_) < 1e-3)
+        or np.any(np.abs(model.theta_ - 1.0) < 1e-3)
+    )
+    g_group_norms = {
+        name: float(np.linalg.norm(model.g_[indices]))
+        for name, indices in zip(features.group_names, features.groups)
+    }
+    tuning = getattr(model, "tuning_diagnostics_", {}) or {}
+    minimum_validation_mse = tuning.get("minimum_validation_mse")
+    minimum_vs_selected = (
+        None
+        if minimum_validation_mse is None
+        else float(validation_mse - minimum_validation_mse)
+    )
     row = _metric_row(
         experiment=experiment,
         model=model_name,
@@ -571,6 +697,14 @@ def _fit_pwl_condition(
             "d_max_abs": float(np.max(np.abs(model.d_))),
             "tuning": model.tuning_diagnostics_,
             "active_h_features": list(model.active_features_),
+            "weak_distillation_r2": weak_distillation_r2,
+            "labeled_prediction_r2": labeled_prediction_r2,
+            "physics_component_norm": physics_component_norm,
+            "process_component_norm": process_component_norm,
+            "theta_boundary_hit": theta_boundary_hit,
+            "g_group_norms": g_group_norms,
+            "d_coefficients": model.d_.tolist(),
+            "minimum_vs_selected_validation_mse": minimum_vs_selected,
         },
         extra=extra,
     )

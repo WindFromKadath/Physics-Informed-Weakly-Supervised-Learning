@@ -1,0 +1,70 @@
+# [INFERRED] 敏感性变体，相对 base.yaml 的差异：simulation.physics_noise_fraction: 0.10
+# Intermediate gate between smoke and the expensive paper protocol.
+# Classification of paper values versus inferred/stability settings:
+# see reproduction/reports/论文内容与非论文修改代码审计.md.
+experiment:
+  seed: 2026
+  sample_sizes: [10, 30, 60, 100, 110, 120]
+  repeats: 5
+  physics_accuracy_targets: [0.85, 0.7, 0.5]
+  physics_accuracy_n_labeled: 40
+  physics_accuracy_baselines: [Ridge, SVR, DT, GP, GBDT]
+  accuracy_calibration_size: 5000
+  accuracy_calibration_seed: 9102026
+  accuracy_scale_log10: [-3, 3, 601]
+  accuracy_correlation_tolerance: 0.02
+  accuracy_require_tolerance: true
+  label_savings_pwl_n_labeled: 30
+  label_savings_sizes: [30, 60, 100, 110]
+  label_savings_baselines: [Ridge, SVR, DT, RF, GBDT, GP]
+  equivalence_margin_fraction: 0.10
+
+simulation:
+  n_weak: 100
+  n_test: 200
+  snr: 5.0
+  # Inferred feasibility profile; Sigma_x is not disclosed in the paper.
+  correlation: 0.9
+  discrepancy_scale: 1.0
+  physics_noise_fraction: 0.10
+  singularity_policy: reject_near_pole
+  noise_reference_size: 5000
+  stability:
+    min_abs_x3: 0.15
+    min_abs_x4: 0.15
+    min_abs_x5: 0.15
+    min_abs_eta_denominator: 1.0
+    min_abs_discrepancy_denominator: 0.75
+    max_abs_component: 25.0
+
+train_fraction: 0.7
+refit_on_train_validation: false
+
+lambda_grid:
+  physics: [0.01, 0.1, 1.0, 10.0]
+  l1: [0.001, 0.01, 0.1]
+  group: [0.001, 0.01, 0.1]
+
+model:
+  mapping: identity
+  standardize: true
+  b_profile: compact
+  d_ridge: 10.0
+  selection_rule: physics_one_standard_error
+  n_jobs: 4
+  parallel_verbose: 5
+  parallel_temp_folder: reproduction/.joblib
+  admm_rho: 1.0
+  admm_adaptive_rho: true
+  admm_tolerance: 0.00001
+  admm_max_iter: 1000
+  bcd_tolerance: 0.0001
+  bcd_parameter_tolerance: 0.01
+  bcd_max_iter: 80
+  theta_starts: 1
+  require_convergence: true
+
+baselines: [Ridge, SVR, DT, RF, GBDT, GP, Physics]
+
+protocol:
+  profile: diagnostic
