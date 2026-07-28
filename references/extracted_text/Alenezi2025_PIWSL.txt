@@ -1,0 +1,1963 @@
+
+
+===== PAGE 1 =====
+2006
+IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+Physics-Informed Weakly-Supervised Learning for
+Quality Prediction of Manufacturing Processes
+Dhari F. Alenezi, Member, IEEE, Michael Biehler , Member, IEEE, Jianjun Shi , and Jing Li , Member, IEEE
+Abstract— In manufacturing processes, a multitude of sensors
+are typically deployed to collect data of process parameters.
+While this provides an opportunity to better predict and control
+the quality of the final product, the relationship between the
+process variables and the desired final quality is often not well-
+understood. To establish this relationship, machine learning (ML)
+models can be used. However, collecting large, labeled datasets
+to train the ML model can be difficult, as creating such datasets
+typically involves costly or destructive end-of-line quality testing
+of the products. To overcome this challenge, we propose a novel
+framework called Physics-informed Weakly-supervised Learning
+(PWL) that integrates physics-based models with data-driven
+ML models. By leveraging physical knowledge and using the
+outputs of physics-based models as weak labels, PWL offers
+an alternative to traditional methods that require large, labeled
+datasets. Our approach simultaneously optimizes the data-driven
+ML model, as well as the discrepancy and calibration parameters
+of the physics-based model, resulting in superior predictive
+performance compared to either model used alone. We demon-
+strate the effectiveness of PWL through simulation experiments,
+comparisons with existing methods, and two real-world case
+studies, highlighting its potential for improving quality prediction
+in various manufacturing systems.
+Note to Practitioners—The proposed method in this paper,
+Physics-informed Weakly-supervised Learning (PWL), addresses
+a common problem in manufacturing processes, where obtaining
+large, labeled datasets can be costly or not always possible.
+By integrating physics-based models with data-driven ML mod-
+els, PWL leverages available physical knowledge to improve
+the predictive performance of product quality in manufacturing
+systems. This enables practitioners to better understand and
+optimize their manufacturing processes even with limited labeled
+datasets, leading to improved product quality and reduced
+production costs.
+Index Terms— Weakly-supervised learning, physics-informed
+machine learning, manufacturing processes, quality prediction.
+Manuscript
+received
+2
+October
+2023;
+revised
+4
+January
+2024;
+accepted 2 March 2024. Date of publication 18 March 2024; date of
+current version 31 January 2025. This article was recommended for
+publication by Associate Editor N. Frigerio and Editor J. Li upon evaluation
+of the reviewers’ comments. (Corresponding author: Jing Li.)
+Dhari F. Alenezi is with the H. Milton Stewart School of Industrial and Sys-
+tems Engineering, Georgia Institute of Technology, Atlanta, GA 30332 USA,
+and also with the Department of Industrial and Management Systems Engi-
+neering, Kuwait University, Safat 13060, Kuwait (e-mail: dhari@gatch.edu).
+Michael Biehler, Jianjun Shi, and Jing Li are with the H. Milton Stew-
+art School of Industrial and Systems Engineering, Georgia Institute of
+Technology, Atlanta, GA 30332 USA (e-mail: michael.biehler@gatech.edu;
+jianjun.shi@isye.gatech.edu; jing.li@isye.gatch.edu).
+This
+article
+has
+supplementary
+downloadable
+material
+available
+at
+https://doi.org/10.1109/TASE.2024.3374098, provided by the authors.
+Digital Object Identifier 10.1109/TASE.2024.3374098
+I. INTRODUCTION
+I
+N MANUFACTURING processes, a multitude of sensors
+are deployed to collect data of process parameters. This
+provides an opportunity to better predict and control the
+quality of the final product. However, the relationship between
+the process variables and the desired final quality is often
+not well understood. To establish this relationship, machine
+learning (ML) models can be built based on historical datasets
+which contain the final quality of each product (Y) and the
+process variables involved in making the product (X), known
+as labeled datasets. However, it can be challenging to obtain
+the labels of products, which often involve comprehensive end-
+of-line quality testing. This can be costly and often infeasible
+for all products in the case of destructive testing techniques.
+As a result, the labeled samples used to train ML models
+are limited. This challenging situation is intensified by the
+fact that industrial processes are inherently noisy. Without
+sufficient data, it would be difficult to build robust models
+and consequently model-based quality prediction would have
+poor performance.
+Recently, there has been some research interest in inte-
+grating physics-based models with data-driven ML models to
+improve the predictive performance [7], [11], [12], [18], [25],
+[26], [32], [33], [37], [41], [43], [47], [49], [55]. Physics-based
+models exploit known information from physical knowledge
+to understand the behavior of a manufacturing process. Such
+models are commonly implemented using either mathematical
+equations or computer simulation, both based on physical laws
+and principles. These models are often more cost-effective than
+obtaining labeled samples via end-of-line quality testing.
+Here we provide a motivating example for a spot-welding
+process shown in Fig. 1. Destructive testing is still the most
+common method to test spot weld properties with the two
+most common testing methods being peel and chisel tests [52].
+However, these methods are time-consuming, costly, and infea-
+sible in continuous production. To avoid destroying samples,
+physics-based models have been used to predict final quality
+features related to the spot-welding process. For instance,
+consider the case that the final quality we are interested in
+predicting is temperature difference of the weld [1T ]. Process
+variables in the welding process include force [kN], current
+[kA], time of weld [s], and mass [g]. A physics-based model
+will utilize mathematical formula from physics to produce a
+prediction for the final quality, temperature difference. The
+input of the mathematical formula includes some of the
+1558-3783 © 2024 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 2 =====
+ALENEZI et al.: PHYSICS-INFORMED WEAKLY-SUPERVISED LEARNING FOR QUALITY PREDICTION
+2007
+Fig. 1.
+Spot welding process.
+process variables such as current, time of weld, and mass,
+as well as parameters related to fundamental mechanical
+principles such as elastic-plastic part deformation and thermal
+expansion [56]. The output from the mathematical formula
+is an estimate of the true temperature difference of the weld
+[1T ].
+Physics-based models can be utilized to provide an estimate
+of the final quality of the product, which will mitigate the
+shortage of labeled samples for building data-driven ML mod-
+els. However, physics-based models have limitations. First,
+it is typical that physics-based models can only take a small
+number of process variables as input. Thus, there may be
+a discrepancy between the output of physics-based models
+and the product quality. Also, physics-based models need to
+include some parameters related to the physical principles that
+are not observable. To estimate the unobservable parameters,
+a technique referred to as model calibration is needed [35].
+However, the calibration process may be inadequate because
+it often relies on oversimplified models and flawed assump-
+tions, which can lead to inaccurate predictions [45]. Hence,
+a physics-based model can be inexact in characterizing the
+process-quality relationship, and thus may not be used as a
+stand-alone model.
+Integrating physics-based models with data-driven ML mod-
+els presents several challenges:
+1) Uncertainty in final quality estimates: Physics-based
+models are often subject to various sources of uncer-
+tainty, requiring model discrepancy to be addressed
+before using the model.
+2) Indirect measurement of final quality: The output of a
+physics-based model may be highly correlated with the
+final quality but may not directly measure it in some
+cases.
+3) Calibration issues: Physics-based models need to be cal-
+ibrated, but calibration is often performed using ad-hoc
+procedures rather than optimization.
+Several studies in the literature have attempted to incorpo-
+rate physics knowledge into their frameworks, yet none have
+fully tackled the challenges mentioned earlier. Some involve
+integrating physics knowledge into deep learning models [11],
+[12], [18], [25], [32], [55], many of which find applications
+in additive manufacturing [25], [32], [55]. For instance, one
+method leverages dimensionality augmentation to incorporate
+information derived from the selective laser melting process
+into the model [55]. Other strategies for incorporating physics
+knowledge into models include the use of physically-informed
+priors [18], incorporating physics constraints within the loss
+function [32], utilizing outputs from physics models as addi-
+tional inputs [32], and pre-training with input-output data from
+physics models [32]. Despite the innovative approaches, a per-
+vasive issue remains: these strategies do not directly address
+data scarcity, a significant concern given the data-intensive
+nature of deep learning models [11], [12], [18], [25], [32],
+[55]. Furthermore, they overlook the calibration challenges
+associated with physics models. While some research has
+attempted to tackle the calibration issue through a two-stage
+approach [11], it remains isolated and not fully integrated with
+the overall prediction process.
+Another area of research involves integrating physics
+knowledge through semi-supervised learning techniques. One
+common approach is utilizing large databases of unlabeled
+physics events and focusing on uncovering data patterns
+and correlations to facilitate label spreading [41]. Another
+approach focuses on utilizing simulations based on estab-
+lished physical theories and principles to create a dataset
+that improves training [7], [26], [37]. For example, Herrero-
+Garcia et al. [26] pre-trained their model using simulations
+from established physics theories to represent known physical
+phenomena in dark matter, then trained on real experimental
+data. Moreover, Chakravarti et al. [7] presented a method that
+leverages a known physics model to generate a background
+dataset and then uses a classifier to differentiate between this
+background data and the experimental data. Semi-supervised
+learning methodology shows promising results in addressing
+data scarcity issues; however, these approaches heavily rely
+on the quality and representativeness of the simulated data
+from the physical model. Moreover, such approaches do not
+address the challenges central to physics-based models, such
+as uncertainty in final estimates and calibration issues.
+To address the challenges, we draw upon ideas from the field
+of weakly-supervised learning in ML [57]. Weakly-supervised
+learning deals with scenarios where it is difficult to obtain a
+large number of samples with precise labels to train an ML
+model, but it is relatively easy to obtain unlabeled samples to
+provide weak supervision for the ML model training. We con-
+sider the output from physics-based models as providing weak
+labels for samples. Driven by this idea, we propose a novel
+framework for Physics-informed Weakly-supervised Learning
+(PWL) in this paper. The novelties of PWL are summarized
+as follows:
+1) PWL utilizes a data-driven approach to handle the
+uncertainty and inadequacy of physics-based models.
+2) PWL utilizes the outputs of physics-based model as
+weak labels, and integrates them with limited labeled
+data collected from the manufacturing process.
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 3 =====
+2008
+IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+3) PWL simultaneously optimizes the data-driven ML
+model as well as the discrepancy and calibration param-
+eters of the physics-based model, thus achieving a better
+performance than each type of model used alone.
+The rest of this paper is structured as follows: Section II
+discusses related research and highlights the gaps in existing
+work, providing motivation for the development of PWL.
+Section III presents the model, algorithm, and theoretical
+property of PWL. Section IV presents simulation experiments
+and comparison of PWL with existing methods. Section V
+provides two real-data case studies of manufacturing processes
+to demonstrate the real-world applications of PWL. Finally,
+Section VI provides the conclusion.
+II. RELATED WORK
+The model we are proposing has significant connections
+with two established research fields: physics-informed ML
+and weakly-supervised learning. This section will present a
+summary of both research fields and highlight the unique
+aspects of our work.
+A. Physics-Informed ML
+This research field aims to integrate physical laws, princi-
+ples, and models with data-driven ML [51]. Due to the variety
+of forms in which physics is represented in various application
+domains, a diverse collection of methods is needed to develop
+physics-informed ML models. These methods can be generally
+divided into two categories: i) physics-informed architecture
+ii) physics-informed regularization [40].
+Physics-informed architecture is a recent research direction
+that can make use of specific characteristics of the problem
+being solved to implicitly encode physical consistency or other
+desired physical properties in designing the ML model. This
+area is focused largely on neural network architecture, due to
+their modular and flexible nature that makes them a prime
+candidate for architecture modification. For example, in lake
+temperature modeling, Daw et al. [15] incorporated a physical
+intermediate variable as part of a monotonicity-preserving
+structure. Similarly, in the paper by Muralidlar et al. [42],
+physics-constrained variables were inserted as the interme-
+diate variables in the convolutional neural network (CNN)
+architecture, which achieved significant improvement in pre-
+dicting drag force on particle suspensions in moving fluids.
+Other research focuses on designing computational graphs that
+mimic the behavior of physics-based methods in preserving
+energy conservation laws [13], [24], [39]. Despite the promis-
+ing features of physics-informed architecture, formulating a
+trainable architecture that represents the problem at hand is
+a challenging task [25]. Moreover, even if an architecture is
+successfully designed, it is often highly application-specific.
+Hence, a new architecture needs to be formulated and trained
+for any change in the initial application conditions.
+Physics-informed regularization could integrate physical
+understanding into the loss function of an ML model, which
+helps generate results that are consistent with established
+physical laws [30], [34], [48]. Pure data-driven ML can fail
+to produce such results directly from data, especially when
+provided with only limited samples. For instance, in the
+context of lake temperature level modelling, one approach
+was to include an extra physics-based penalty that guaranteed
+predictions of denser water were at reduced depths than those
+of much less thick water, which was a known monotonic
+relationship [14]. Moreover, other approaches may attempt
+to create a regularization term that accounted for the under-
+lying physics by penalizing divergence form the governing
+equations, such as Burgers’ equation [47]. However, physics-
+informed regularization may not be feasible due to several
+challenges [33]:
+1) Mismatched input variables: Physics-informed regular-
+ization may not be feasible if the physics-based model
+and the ML model do not share the same input variables.
+2) Limited generalizability: Regularization with limited
+samples may restrict the model’s generalizability, lead-
+ing to performance deterioration.
+3) Incomplete or imprecise knowledge: It is essential to
+recognize that the knowledge from physics-based mod-
+els may be incomplete or imprecise.
+4) Complexity of large-scale neural networks: Physics-
+informed ML models often involve training large-scale
+neural networks with complicated loss functions, which
+can be highly non-convex optimization problems.
+5) Competing loss function terms: The terms in the loss
+function may compete with each other during training,
+making the training process less robust and stable,
+and potentially preventing convergence to the global
+minimum.
+An integration framework that is capable of integrating
+incomplete/imprecise physical knowledge with ML is highly
+desirable, which is the goal of this research.
+B. Weakly-Supervised Learning
+In ML, the models trained using only labelled samples are
+known as supervised learning models. In many applications,
+there may be samples that are not precisely labelled but can
+still be useful to provide some “weak” supervision for the
+ML model. This field is known as weakly-supervised learning.
+Research in weakly-supervised learning can be categorized
+based on the quality and characteristics of weakly labeled
+data to three main fields: inexact supervision, inaccurate super-
+vision, and incomplete supervision [57]. Inexact supervision
+refers to situations where the labels or annotations provided
+are incomplete or noisy, meaning that they do not fully capture
+the desired concept or class [16], [21]. For example, in image
+classification, an image might have multiple objects, but only
+one object is labelled [10]. Inaccurate supervision, on the
+other hand, refers to situations where the provided labels
+or annotations are wrong. For example, an image of a dog
+might be labeled as a cat [22]. In the case of incomplete
+supervision, a portion of the training samples is labeled,
+with the remainder being unlabeled. This presents unique
+challenges as the algorithm must learn from both labeled
+and unlabeled data, often requiring innovative approaches to
+effectively leverage the unlabeled portion. Techniques like
+semi-supervised learning [8], [59] and active learning [50] are
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 4 =====
+ALENEZI et al.: PHYSICS-INFORMED WEAKLY-SUPERVISED LEARNING FOR QUALITY PREDICTION
+2009
+commonly employed under incomplete supervision, aiming
+to maximize learning efficiency from limited labeled data.
+Active learning operates under the assumption of having an
+‘oracle’, like a human expert, who can provide labels for
+chosen unlabeled samples. The objective of active learning
+methods is to identify the most informative unlabeled samples
+to send them to the ‘oracle’ for querying.
+In the semi-supervised learning (SSL) approaches, the
+dependency on an external ‘oracle’ for guidance is eliminated.
+This approach combines the use of both labeled and unlabeled
+data to enhance model training in areas such as classification
+and prediction. Several SSL algorithms exist, with some based
+on the concept that data naturally forms clusters, suggesting
+that samples in the same cluster share similar class labels [8].
+Graph-based learning, a key technique in SSL, involves cre-
+ating graphs where nodes are training samples and edges
+reflect their interrelations [4], [23]. Other strategies consider
+the labels for unlabeled data as simply missing, operating
+under the premise that all data, labeled or not, are derived from
+a unified model [44]. Furthermore, certain SSL methods focus
+on pinpointing boundaries in less densely populated data areas
+while ensuring the accurate classification of labeled data [9],
+[31], [38]. However, the field of SSL, while extensive, has
+yet to fully explore incorporating physics-related information
+from unlabeled samples into model building.
+Moreover, recent work in weak supervision capitalizes on
+domain knowledge to facilitate ranking unlabeled data sam-
+ples, a strategy that has found considerable applicability in
+healthcare settings [19]. Particularly, this methodology [19]
+hinges on utilizing expert insights to generate relative rankings
+based on anticipated reactions to treatments, such as medica-
+tion effects in Parkinson’s disease management, thus providing
+a binary label for a pair of unlabeled samples. However, this
+strategy finds limited applicability in the manufacturing sector
+because it lacks a parallel to the healthcare knowledge-driven
+ranked samples. Also, the manufacturing domain, governed
+rigidly by physical laws, demands a more structured and
+quantifiable approach to data labeling derived from established
+physical principles.
+C. Gaps
+The proposed PWL model integrates the output of the
+physics-based model with data-driven ML, while at the same
+time optimizing the physics-based model by estimating the
+discrepancy and calibration parameters of the physics-based
+model. In this way, the integration can be more effective.
+In comparison, the existing works in physics-informed ML
+integrate physical laws, principles, and models as they are,
+without optimizing them. In the field of weakly-supervised
+learning, none of the existing works consider weak supervision
+from the physics-based model. In this sense, PWL is also
+substantially different from the existing weakly-supervised
+models in ML.
+III. PHYSICS INFORMED WEAK LEARNING (PWL)
+In this section, we will present the development of PWL.
+Section III-A defines the problem setting and notations.
+Section III-B proposes the model formulation. Section III-
+C proposes an optimization problem for model estimation.
+Section III-D presents the algorithm for solving the optimiza-
+tion and the associated theoretical properties.
+A. Notations and Problem Statement
+Let
+denote the output variable (i.e., product quality) of
+a manufacturing process.
+is typically affected by a set of
+variables and parameters that are responsible for making the
+final product. In practice, we are interested in predicting the
+product quality
+either empirically using a physics-based
+model or a data-driven ML model.
+1) Physics-Based Models and Limitations: Physics-based
+models depend on physical understanding of the system’s input
+and output, and characterize the relationship between the input
+variables and the output variable as follows:
+i = ϕ[η
+
+x ph
+i , θ
+
+] + εdisc
+i
++ εi,
+(1)
+where η(·, ·) : R(q1+q3)→Rz is the deterministic output from
+a physics-based model, ϕ is a mapping function that maps
+from the physics-based model output to the product quality,
+εdisc
+i
+∈R is an unknown model discrepancy term between the
+mapped physics-based model output and the product quality,
+x ph
+i
+∈Rq1 are input variables to the physics-based model,
+θ ∈Rq3 are calibration parameters which cannot be directly
+controlled or measured in a real manufacturing process, such
+as material properties, boundary conditions, etc., εi ∈R is an
+random error, and i is the index for samples such as products
+made by the manufacturing process.
+Generally, physics-based models are a complex mathemat-
+ical representation of the true system that are implemented
+through a computer model or a physical equation. The mathe-
+matical representation may not accurately emulate the process
+observations mainly due to two reasons:
+First, application of physics-based models is accompa-
+nied by various sources of uncertainty. In our framework,
+we address two sources of uncertainty that significantly affect
+the performance of a physics-based model. The first source is
+commonly referred to as model discrepancy. Model discrep-
+ancy can be defined as the difference between the output of
+the real-world manufacturing process such as product quality
+and the output of the physics-based model at the same inputs’
+values. Hence, even if we know the true values of all the
+inputs required to generate an output from the physics-based
+model, this output may not be equal to the true output
+of the manufacturing process, thus creating a discrepancy
+denoted by εdisc
+i
+in Eq. 1. This discrepancy exists because
+of insufficient inputs. Physics-based models are built only on
+input variables which have a well-understood relationship with
+the model’s output based on physical knowledge. Hence, it is
+likely that many variables in the manufacturing process cannot
+be included in the physics-based models.
+Second, physics-based models have unknown parameters
+that need to be calibrated, denoted by θ in Eq. 1. Calibration
+can be defined as the activity of adjusting θ until the output
+of the physics-based model fits the observed data from the
+real manufacturing process [35]. In practice, calibration is
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 5 =====
+2010
+IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+typically used as an ad-hoc fitting in a pre-step. The fitted
+calibration parameter is substituted into the physics-based
+model to generate an output. This sequential approach may
+be sub-optimal due to inefficiencies in the two-step process,
+potential overfitting during ad-hoc fitting, incomplete param-
+eter optimization, and a lack of joint optimization between
+the physics-based and ML models. An alternative approach
+that integrates both models more effectively can lead to better
+predictive performance and improved understanding of the
+manufacturing process [47].
+2) Data-Driven ML Models and Limitations: Due to the
+advanced sensing capability of modern manufacturing sys-
+tems, x ph are not the only measurable variables in the system.
+Hence, we define another set of variables x pr ∈Rq2 which
+represent measurable variables in a real system that are not
+included in the physics-based model. This motivates another
+modeling approach, data-driven models, to model the relation-
+ship between all measured variables in the system and
+as
+follows:
+i = f
+
+x ph
+i , x pr
+i
+
++ εi,
+(2)
+where f ∈R(q1+q2)→R is an ML model to be trained based
+on observational data.
+In practice, the performance of data-driven models is hin-
+dered by two main challenges. Firstly, the number of labeled
+samples can be very limited, making the model training less
+robust. Secondly, these models follow a pure data-driven
+approach without taking physical knowledge into considera-
+tion. In fact, we may consider physical knowledge to provide
+a form of “virtual/synthetic data” to help mitigate the shortage
+of labeled samples.
+3) A Joint Model Perspective:
+We seek to integrate
+physics-based models and data-driven models in a unified
+framework to leverage their complementary power. To further
+highlight the significance of this approach, let us revisit
+our motivating example, the spot-welding process: The prod-
+uct quality variable y is weld temperature difference. The
+physics-based model η(·, ·) is a mathematical equation that
+utilizes principles of thermal resistivity and conductivity. The
+inputs to the physics-based model, x ph, include the current
+magnitude and time of the weld. The unknown calibration
+parameters θ in the physics-based model include thermal
+conductivity and resistivity coefficients. On the other hand,
+there are other variables in the process that are not included
+in x ph, i.e., x pr which includes the force magnitude. A data-
+driven model can be built based on x ph and x pr. It can be seen
+that neither model is sufficient by itself to produce an adequate
+predictive performance, because they neglect the fact that
+is jointly influenced by the three sets of variables as follows:
+i = u
+
+x ph
+i , x pr
+i , θ
+
++ εi,
+(3)
+where u(·, ·, ·) : R(q1+q2+q3)→R is the underlying unknown
+true process-quality relationship.
+Models that are developed without taking Eq. 3 into consid-
+eration will lead to suboptimal solutions. PWL focuses mainly
+on the improvement and integration of the two modeling
+approaches, physics-based models and data-driven models,
+while respecting the assumption in Eq. 3.
+B. Joint Model Formulation
+It is difficult to directly formulate a joint model as in Eq.
+3. We propose the following formulation:
+i = H
+
+x ph
+i , θ
+
+g + B
+
+x pr
+i , x ph
+i
+
+d+ εi,
+(4)
+where H : Rq1+q3 →Rp are basis functions for creating
+patterns associated with x ph
+i
+and θ, g ∈Rp are coefficients
+vectors associated with the patterns created by H; B
+:
+Rq1+q2 →Rb are basis functions for creating patterns asso-
+ciated with x pr
+i
+and x ph
+i , d ∈Rb are coefficients vectors
+associated with the patterns created by B. The basis matrix
+formed by H and B are used to represent patterns in the
+original feature matrix, and the coefficients g and d are
+estimated based on the patterns in H and B, respectively.
+By using basis, the objective function aims to identify the
+most important patterns in the data for predicting the response
+variable such as product quality.
+The structure of the model proposed in Eq. 4 offers three
+significant advantages. First, the model is structured in a way
+that it allows the first term to have the same input as the
+physics-based model to allow knowledge distillation. Knowl-
+edge distillation [29] is a technique used in ML to transfer
+knowledge from a larger, more complex model (known as
+the teacher model) to a smaller, simpler model (known as the
+student model). This will help address labeled data shortage
+by allowing the model to additionally learn from the abundant
+weakly labeled samples produced by the physics-based model
+η(·, ·). Second, the second term helps mitigate the discrepancy
+of using the physics-based model alone. Since this term is
+built upon both x ph and x pr, it can leverage the data-driven
+model. Overall, the model in Eq. 4 combines physics-based
+and data-driven models together. Third, this is a highly flex-
+ible framework that can accommodate various types of basis
+functions. By choosing different basis functions, the model can
+be tailored to specific problem settings, allowing it to capture
+diverse patterns and relationships in the data. This adaptability
+makes the proposed framework suitable for a wide range of
+applications in manufacturing and other domains.
+Notably, in the model in Eq. 4, the calibration parameters
+θ are integrated with the model formulation, which makes it
+possible to optimize θ together with other model parameters,
+instead of making calibration a pre-step.
+C. Optimization
+In order to estimate the model parameters and calibration
+parameters for the model in Eq. 4, we propose the following
+optimization:
+min
+g,θ,d
+Xn
+i=1
+
+i −H
+
+x ph
+i , θ
+
+g −B
+
+x pr
+i , x ph
+i
+
+d
+
+2
+F
++ λ1
+XN
+j=1
+H
+
+x ph
+j , θ
+
+g−ϕ[η
+
+x ph
+j , θ
+
+]
+
+2
+F
++ λ2∥g∥1 + λ3
+X(q1+q3)
+q=1
+gq
+
+2
+s.t.
+ωl ≤θ ≤ωu,
+(5)
+where ωl ∈Rq3 and ωu ∈Rq3 are lower and upper bounds
+of the calibration parameters θ. N is the number of samples
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 6 =====
+ALENEZI et al.: PHYSICS-INFORMED WEAKLY-SUPERVISED LEARNING FOR QUALITY PREDICTION
+2011
+generated by the physics-based model, while n is the number
+of labeled samples collected from the manufacturing system.
+N is generally much larger than n. Next, we explain the
+purpose of each term in Eq. 5:
+1) The first term comes from Eq. 4, which aims to minimize
+the prediction error on the product quality variable,
+which is the overall goal of the framework.
+2) The second term has two purposes. The first purpose is
+to regularize how much the H
+
+x ph
+i , θ
+
+g learns from the
+physics-based model η(·, ·). The amount of regulariza-
+tion is dependent on the accuracy of the physics-based
+model. If the physics-based model is inaccurate, reg-
+ularization should be relatively weak, which can be
+realized by a smaller λ1. The second purpose is to handle
+the mismatch between the quality variable
+i and the
+physics-based model output η(·, ·). That is, they can be
+highly correlated but not necessarily measure the same
+thing. Hence, we introduced the ϕ function.
+3) The third term is the L1 penalty, which encourages
+sparsity at the individual coefficient level by applying an
+L1 norm penalty to all the coefficients in g. This penalty
+term helps to identify the most important individual
+variables for predicting the outcome.
+4) The fourth term is a group lasso penalty, which encour-
+ages group sparsity by applying an L2 norm penalty
+to each group of coefficients gq separately and then
+summing over all the groups. This penalty term helps
+to identify the most important groups of variables for
+predicting the outcome.
+5) Together, the third and fourth terms form a combina-
+tion of group selection and variable selection methods,
+known as the sparse group lasso. The parameters λ2
+and λ3 control the trade-off between group sparsity and
+individual sparsity, respectively. This is required since
+we are generating patterns related to the x ph
+i
+and θ using
+the basis function H. Some of those patterns are related
+to the same phenomena, and hence we desire their
+effects to be chosen or unchosen together. Moreover, the
+patterns generated by H are not necessarily independent,
+and hence this penalty can help with identifiability issues
+in our model which will be discussed in more details in
+Section III-D3.
+The optimization model in Eq. 5 jointly optimizes the
+physics-based model and data-driven model to achieve better
+predictive performance. Also, the model optimizes the calibra-
+tion parameters θ in the physics-based model in the integrated
+framework. The proposed model in Eq. 5 is clearly non-convex
+and highly complicated to optimize. The algorithms devel-
+oped to optimize the model will be discussed in detail in
+Section III-D.
+D. Algorithm
+The problem in Eq. 5 is not convex. However, it can
+be solved through a Blockwise Coordinate Descent (BCD)
+algorithm, where we iteratively update the g, θ, and d as
+shown in Algorithm 1.
+Algorithm 1 The PWL algorithm
+Input: H(., .), B(., .), ϕ(.), ε0
+Initialize: d = d0, θ = θ 0
+While (
+h
+i −
+
+H
+
+x ph
+i , θ
+
+g −B
+
+x pr
+i , x ph
+i
+
+d
+i2
+≥ε0)
+1)
+Update g According to ADMM Algorithm (Section III-D1.)
+2)
+Update d as:
+min
+d
+Pn
+i=1
+yi −H
+
+x ph
+i , θ
+
+g −B
+
+x pr
+i , x ph
+i
+
+d
+
+2
+F
+3)
+Update θ according to ADMM algorithm (Section III-D2.)
+End
+Even though the problem in Eq. 5 is not convex, the three
+updates in Algorithm 1 are convex. In the PWL algorithm,
+there are two intuitive considerations about the initialization.
+First, we want to initialize d using small values to allow g
+to learn from the physics-based model in the first update.
+Second, we want to initialize θ to give the best possible
+performance of the physics-based model η(·, ·); hence it will
+be initialized according to our physics-based model calibration
+approach that to be discussed in Section IV. The d update has
+a close-form solution since we can cast it as a least square
+problem. On the other hand, the g and θ updates are not
+as simple and will be discussed in detail in Sections III-D1.
+and III-D2, respectively. Lastly, we will discuss properties
+of our algorithm related to identifiability and uniqueness in
+Section III-D3.
+1) The g Update: In the g update, the problem in Eq. 5
+reduces to solving the following problem:
+min
+g
+Xn
+i=1
+
+i −H
+
+x ph
+i , θ
+
+g −B
+
+x pr
+i , x ph
+i
+
+d
+
+2
+F
++ λ1
+XN
+j=1
+H
+
+x ph
+j , θ
+
+g−ϕ[η
+
+x ph
+j , θ
+
+]
+
+2
+F
++ λ2∥g∥1 + λ3
+X(q1+q3)
+q=1
+gq
+
+2.
+(6)
+The
+problem
+in
+Eq.
+6
+is
+a
+sum
+of
+convex
+func-
+tions and hence convex. Assuming the basis functions
+H
+
+x ph
+i , θ
+
+, B
+
+x pr
+i , x ph
+i
+
+and
+H
+
+x ph
+i , θ
+
+were selected,
+to facilitate the estimation procedure, we represent them in
+the matrix form as H1 ∈Rn×p, B1 ∈Rn×b and H2 ∈RN×p,
+respectively. The problem in Eq. 6 is reformulated as follows:
+min
+z
+M
+X
+m=1
+fm(z),
+(7)
+where
+M = 4, f1(g) = ∥Y −H1 g−B1d∥2
+F, f2(g)
+= λ1
+H2 g−˜η]
+2
+F, f3(g)
+= λ2∥g∥1, f4(g) = λ3
+X(q1+q3)
+q=1
+gq
+
+2, ˜η
+=
+
+
+ϕ[η
+
+x ph
+1 , θ
+
+]
+...
+ϕ[η
+
+x ph
+N , θ
+
+]
+
+, Y =
+
+
+y1
+...
+yn
+
+.
+An effective and efficient algorithm to solve the problem in
+Eq. 7 can be developed using the Alternating Direction Method
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 7 =====
+2012
+IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+Algorithm 2 The ADMM consensus algorithm
+Input: step size 1,ϵ
+Initialize: replicates z(0)
+m
+= 0, u(0)
+m
+= 0,¯z = 0, for m =
+1, . . . , M, of the same shape as z.
+For k = 1, 2, . . . do
+Update z(k)
+m = prox1fm
+h
+¯z(k−1) −u(k−1)
+m
+i
+, for
+m = 1, . . . , M, in parallel.
+¯z(k) =
+M
+P
+m=1
+z(k)
+m
+M
+u(k)
+m = u(k−1)
+m
++ z(k)
+m −¯z(k)
+If
+¯z(k) −¯z(k−1) < ϵ
+Stop
+End
+End
+of Multipliers (ADMM) consensus algorithm [46], summa-
+rized in Algorithm 2 below. In order to apply the ADMM
+consensus algorithm to this problem, we first derive the
+proximal operator for the objective function, which involves
+computing the optimal solution for each variable while keeping
+the other variables fixed. The proximal operator is a key
+component in the ADMM framework and is crucial for the
+convergence and stability of the algorithm. By incorporating
+the proximal operator into the ADMM consensus algorithm,
+we can efficiently solve the optimization problem in Eq. 7
+while ensuring a robust and stable solution.
+Even To implement Algorithm 2 in solving Eq. 7, we need
+to evaluate the proximal operators of 1f1, . . . 1fM. The results
+are in Proposition 1, and the derivation is in Section A. in in
+the supplementary materials.
+Proposition 1: Let f1(g) = ∥Y−H1 g−B1d∥2
+F, f2(g) =
+λ1
+H2 g−˜η]
+2
+F, f3(g)
+=
+λ2∥g∥1, and f4(g)
+=
+λ3
+P(q1+q3)
+q=1
+gq
+
+2. The proximal operators of 1f1, . . . 1f4 are
+given as follows: Let z and a have the same size as g.
+1) If z = prox1f1[a], we have
+prox1f1[a] =
+ I + 1H⊤
+1 H1
+−1 a +1 H⊤
+1 (Y −B1d)
+
+,
+where I is the identity matrix of order p.
+2) If z = prox1f2[a], we have
+prox1f2[a]
+=
+ I+λ11H⊤
+2 H2
+−1 a + λ11H⊤
+2 ˜η
+
+,
+where I is the identity matrix of order p.
+3) If z = prox1f3[a], we have
+prox1f3[a] = Sλ21(a) =
+
+
+
+a−λ2 1, a > λ21
+0, −λ2 1 ≤a ≤λ21
+a+λ2 1, a ≤λ21.
+4) If z = prox1f4[a], we have
+prox1f4[a] =
+
+1−λ31
+∥a∥2
+
++
+a.
+2) The θ Update: In the θ update, the problem in Eq. 5
+reduces to solving the following problem:
+min
+θ
+Xn
+i=1
+
+i −H
+
+x ph
+i , θ
+
+g −B
+
+x pr
+i , x ph
+i
+
+d
+
+2
+F
++ λ1
+XN
+j=1
+H
+
+x ph
+j , θ
+
+g−ϕ[η
+
+x ph
+j , θ
+
+]
+
+2
+F
+s.t.
+ωL ≤θ ≤ωU.
+(8)
+The problem in Eq. 8 is a sum of convex functions
+under a convex constraint and hence convex. We can uti-
+lize Algorithm 2 to solve it, with M = 3 and f1(g) =
+∥Y −H1 g−B1d∥2
+F, f2(g)
+=
+λ1
+H2 g−˜η]
+2
+F, f3(g)
+=
+q3P
+k=1
+IωLk ≤θk≤ωLk . The proximal operators of the functions
+that are given in Proposition 2. The derivation is given in
+Section B. in the supplementary materials.
+Proposition 2: Let f1(g) = ∥Y −H1 g−B1d∥2
+F, f2(g) =
+λ1
+H2 g−˜η]
+2
+Fand f3(g)
+=
+q3P
+k=1
+IωLk ≤θk≤ωUk .
+The
+prox-
+imal
+operators
+of
+1f1, . . . 1f3
+are
+given
+as
+follows:
+Let z and a have the same size as θ.
+1) If z = prox1f1[a], we have
+2) prox1f1[a]
+=
+ I + 1gg⊤−1 a +1 g(Y −B1d)⊤
+,
+where I is the identity matrix of order p.
+3) If z = prox1f2[a], we have
+4) prox1f2[a] =
+ I+λ11gg⊤−1 a + λ11g ˜η⊤
+, where I
+is the identity matrix of order p.
+5) If z = prox1f3[a], we have
+zk = prox1f3[ak] = max
+
+ωLk, min
+
+ak, ωUk
+		
+.
+3) 3. Identifiability and Uniqueness: Another aspect of our
+algorithm that needs to be discussed is identifiability issues
+that may arise in evaluating terms on the form H1g appearing
+in Eq. 7 for instance. This problem can be casted as a dictio-
+nary learning problem since we are in some sense trying to
+learn a basis matrix, H1, and a sparse coefficints vector, g, The
+dictionary learning method does not assume that the patterns in
+H1 to be orthogonal like principal component analysis, and
+the reconstructed signal is often evaluated accurately under
+mild conditions. However, this does not guarantee that dictio-
+nary learning can uniquely recover sparse data from samples.
+In other words, the uniqueness of the learned basis and sparse
+coefficients vector is not always guaranteed, which may create
+an identifiability issue. The detailed statistical assumptions
+that guarantee the identifiability is stated in proposition 3 and
+further discussed in Section C. in the supplementary materials.
+Proposition 3:
+Suppose g is a vector with at most k ≪
+m nonzero entries, called k-sparse. Assume the basis H is
+spark on the vectors g such that:
+H g1 = H g2 f or g1, g2 ∈Rm ⇒g1 = g2
+Assuming H is given, and our signal is constructed such
+that
+˜Y = Hg,
+where ˜Y = Y−B1d, a lower bound can be set on the number
+of samples, n, of ˜Y that guarantees unique recovery of sparse
+vector g from a signal ˜Y with a given basis matrix A such
+that:
+n ≥Ck log
+m
+k
+
+,
+where C is a constant independent of m, n, and k.
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 8 =====
+ALENEZI et al.: PHYSICS-INFORMED WEAKLY-SUPERVISED LEARNING FOR QUALITY PREDICTION
+2013
+In the case H is unknown, assuming the above holds,
+we assume we can subsample N similar samples of ˜Y from
+our system such that we have ˘Y = { ˜Y 1, . . . , ˜Y N. Then, the
+uniqueness of both g and H can be ensured if we establish
+a lower bound on the required number of subsamples, N, for
+the uniqueness of A with a probability of (1 −β) as follows:
+N = k + 1
+β
+ m
+k
+
+.
+The formula above implies that if the number of subsamples
+is sufficiently large, as specified in Proposition 3, the sparse
+matrix factorization of the basis matrix will be unique. For
+further discussion and proofs on the identifiability, readers are
+referred to [1].
+IV. SIMULATION STUDIES
+This section of the paper utilizes simulated data to explore
+and measure the capabilities and efficiency of our model.
+We have structured our simulation experiments, presented
+from sections IV to IV-B, with the aim of resolving the
+questions below:
+1) How well does PWL perform under different sample
+sizes of the labeled data (Section IV)?
+2) How does the accuracy of the physics-based model affect
+PWL performance (Section IV)?
+3) How many labeled samples can be conserved through
+integrating samples generated from the physics-based
+model (Section IV-A)?
+Data Generation: The process for generating data is uni-
+form across all experiments, but the specific values of the
+parameters can vary. The process of generating simulated
+data begins with sampling the input variables
+
+x pr
+i , x ph
+i
+
+from a multivariate normal distribution, i.e.,
+
+x pr
+i , x ph
+i
+
+∼
+M N(0, 6x), where 6x is the covariance matrix. The cali-
+bration parameters are sampled from a uniform distribution,
+θ ∈(0, 1]. Then, we adopt the synthetic toy example from
+Bastos and O’Hagan [2] with some modification to simulate
+the output variable as follows:
+i = ηtrue
+
+x ph
+i , θ
+
++h
+ x pr
+i
+
++
+εi, where ηtrue(., .) is the physics-based model, h(.) is a
+function of the process variables not included in the physics-
+based model, and εi is sampled from N(0, σ 2
+ε ). σ 2
+ε is the
+noise variance based on the selected signal-to-noise ratio
+SN R =
+Var( )
+σ 2ε
+. We assume in our simulation that we cannot
+observe ηtrue(., .) but a less accurate version of it as follows:
+η
+
+x ph
+i , θ
+
+= ηtrue
+
+x ph
+i , θ
+
++ δ
+
+x ph
+i
+
++ εη, where, δ(.) is
+a function that simulates the discrepancy of the physics-
+based model, and εη is uncertainty in the physics-based model
+sampled from N(0, σ 2
+εη). In our simulations, the SNR is fixed
+at five, q1 to three, q2 to two, and q3 to two. The functional
+forms for our models in the simulation are chosen as follows:
+ηtrue
+
+x ph
+i , θ
+
+=
+
+1 −exp
+
+−1
+2x3
+
+× 10θ1x3
+1 + 19x1 + 60
+9θ2x3
+2 + 4x2 + 20
+(9)
+δ
+
+x ph
+i
+
+= 10x2
+1 + 4x2
+2 + 2x3
+3
+50x1x2 + 10
+(10)
+h
+ x pr
+i
+
+= 4x2
+4 + 8x2
+5
+5x4x5
+(11)
+Models Under Comparison: We compare PWL with a
+variety of supervised learning models in ML, which can
+only use labeled samples in training and cannot incorporate
+the physics-based model as PWL. The following models are
+compared against in the simulations:
+• Ridge regression (RR) as representative of linear regres-
+sion (LR) models, it uses quadratic loss and a squared L2
+regularization for the model’s coefficients.
+• Support vector regression (SVR) as representative of
+kernel learning methods. The kernel type selected is a
+polynomial kernel function which produced best results
+on our simulated dataset.
+• Decision tree (DT) as representative of is a tree-based
+nonparametric supervised learning method. The max-
+imum depth was selected based on prior research
+findings [4], [10] and best performance was selected in
+every experiment.
+• Random forests (RF) as representative of ensemble
+methods and gradient boosted decision trees (GBDT)
+are typical choice in this case. For the hyperparameter
+settings, the number of boosting stages was selected from
+[30, 100, 160], learning rate was selected from [0.1, 0.15,
+0.2], and the maximum depth was selected based on prior
+research findings [4], [6], [8], and the best performing
+parameters were selected in every experiment.
+• Gaussian process regression (GP) as representative of
+nonparametric, Bayesian approaches. A squared exponen-
+tial kernel showed best performance on our dataset.
+• Physics-based model (Physics) as representative of
+physics-based models. The model is calibrated using a
+two-step procedure. First, calibration parameters were
+obtained through least-squares estimation as follows:
+ˆθ = arg
+min
+θε[ωLωU]
+n
+X
+i=1
+h
+i −f
+h
+η
+
+x ph
+i , θ
+ii2
+(12)
+Then, the model discrepancy was estimated using a gaussian
+process model similar to the approach described in Kennedy
+and O’Hagan [35] to achieve best performance.
+Performance Metrics: To verify the effectiveness of the
+proposed method, three commonly used metrics in regression
+task are employed in this work, i.e., MSE, RMSE, and MAE.
+Besides, the mean values and the standard deviations are
+obtained by independent experiments with different random
+seeds to ensure the experiments reliability.
+A. Model Performance With Varying Sample Sizes
+The objective of this experiment is to assess and contrast
+the effectiveness of models using varying samples size. Twelve
+unique scenarios are constructed, beginning with a scenario of
+only 10 labeled samples, and progressively adding 10 more
+labeled samples in each subsequent scenario. This increment
+continues until the final scenario, which encompasses a total
+of 120 labeled samples. On the other hand, we assume in
+each scenario that there are 100 samples generated from
+the physics-based model η(·, ·). In each of these scenarios,
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 9 =====
+2014
+IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+Fig. 2.
+Average test RMSE across all models.
+we allocate 70% of the labeled samples for the training
+process and use the remaining 30% for validation. We also
+produce a separate test set with 200 labeled samples, which is
+employed to assess and compare the predictive performance
+across different models.
+In each scenario, PWL is trained based on both the labeled
+samples and the samples generated from the physics-based
+model. For PWL, the three tuning parameters are determined
+by achieving the lowest MSE on the validation set. A similar
+approach is applied for tuning the parameters of other models,
+focusing on minimizing the MSE during validation. This
+training, validation, and testing process is repeated 20 times
+randomly for each model, with recoding both the average and
+standard deviation of their performance metrics. In Figure 2,
+it is evident that PWL consistently outperforms its counterparts
+in terms of average RMSE. To evaluate the statistical sig-
+nificance of this performance disparity, one-sided hypothesis
+tests are performed comparing PWL against each competing
+model. The results indicate that PWL’s performance metrics
+are significantly better across all scenarios compared to the
+metrics of competing models.
+Table I shows the detailed performance of three of our
+scenarios representing low, medium, and high labeled data
+availability in training. Moreover, the comparison between
+PWL and its competing models reveals that the largest per-
+formance gap is observed in cases with a limited number of
+labeled samples. This shows the advantage of PWL due to its
+capability of incorporating knowledge from the physics-based
+model to compensate for the shortage of labeled samples
+in training. Moreover, by comparing PWL with the physics-
+based model, we can observe that, regardless of increasing
+the number of training samples in training, the physics-based
+model exhibits a limit in its performance, due to the less
+flexible structure of the physics-based model.
+Moreover, for a more comprehensive assessment that
+includes performance stability, Figure 3. features a boxplot
+analysis of the MSE in each scenario for PWL versus the best
+performance of the competing models. This analysis highlights
+a more rapid decrease in both the mean and the spread of
+MSE values for PWL. Additionally, the comparison reveals
+that the competing model exhibits greater fluctuations in both
+TABLE I
+ALL MODELS’ PERFORMANCE METRICS ON TEST DATA FOR THREE
+SELECTED SCENARIOS
+Fig. 3.
+Boxplots of MSE for PWL vs. best competing model.
+variance and mean, suggesting that its performance is less
+robust compared to PWL.
+B. Model Performance Under Different Physics-Based Model
+Accuracies
+The findings in the previous section showed that PWL can
+help improve performance under a limited number of labeled
+samples compared with competing models. The improvement
+is achieved by incorporating physical knowledge in training,
+which can help mitigate the shortage of labeled samples.
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 10 =====
+ALENEZI et al.: PHYSICS-INFORMED WEAKLY-SUPERVISED LEARNING FOR QUALITY PREDICTION
+2015
+TABLE II
+PWL PERFORMANCE UNDER DIFFERENT PHYSICS-BASED MODEL ACCU-
+RACIES VS. COMPETING MODELS
+This result leads to the question regarding how much the
+performance will be affected by the inaccuracy of the physics-
+based model.
+To answer this question, we focus in this experiment on
+the physics-based model η(·, ·) used in PWL. We use Pear-
+son correlation between the label yi and the output of the
+physics-based model η(·, ·) as a metric for the accuracy of
+the physics-based model. The correlation will be controlled
+through varying the magnitude of the discrepancy function
+δ
+
+x ph
+i
+
+. We create three different scenarios over which the
+physics-based model accuracy will vary, including a highly
+accurate model (i.e., scenario 1) with a correlation of 0.85,
+a mildly accurate model (i.e., scenario 2) with a correlation
+of 0.7, and an insufficiently accurate model (i.e., scenario
+3) with a correlation of 0.5. All scenarios are based on
+40 labeled samples and 100 samples generated from the
+physics-based model η(·, ·). Table II shows the performance
+metrics of the experiments. We can see that the accuracy of the
+physics-based model significantly affects PWL performance
+with the best performance achieved with the highly accurate
+physics-based model (i.e., PWL-H). However, one important
+observation is that the performance of PWL with insufficiently
+accurate physics-based model (i.e., PWL-L) is statistically
+undisguisable from the best performance achieved by compet-
+ing methods. This indicates that even when the physics-based
+model is not sufficiently accurate, we can expect that the
+performance of PWL is still comparable to competing methods
+that only include labeled samples in training. This result is due
+to the fact that PWL utilizes a tunning λ1 to control how much
+the physics-based model should be emphasized in the training
+process.
+C. Saving of Labeled Samples Using PWL
+The previous experiments showed that PWL can be very
+helpful when the labeled samples are limited, compared with
+models that rely only on the labeled samples. Hence, it is
+desirable to learn how many labeled samples can be saved by
+adopting PWL in order to achieve the same performance as
+other models. To answer this question, we focus on scenario
+3 in Section IV-A, in which PWL achieved an average MSE
+of 3.745 with a training set of 30 labeled samples and
+Fig. 4.
+MSE performance of competing models with increasing labeled
+sample size.
+100 samples from the physics-based model. To determine how
+many extra labeled samples are required for the competing
+models to achieve the same MSE as PWL, the number of
+labeled samples is varied incrementally from 30 to 110 with
+10 sample increments. Under each sample size, all competing
+models are trained and only the top-performing model’s results
+are record. Figure 4 shows the MSE of best competing model
+(red curve) in comparison with PWL (blue curve).
+We can observe that the MSE of competing models drops
+to be lower than that of PWL with 110 labeled samples
+in training. We conduct one-sided hypothesis testing to see
+when the performance of competing models has statistically
+equivalent MSE to PWL. The result shows that statistical
+equivalence is achieved when 100 samples are included in
+training. This indicates that an increment of 233.3% in labeled
+samples is required by the competing models to achieve
+the same performance of PWL. Hence, the benefit of PWL
+in situations of costly data collection is substantial.
+V. CASE STUDIES
+In this section, we will present the application of PWL in
+two real datasets.
+A. Temperature Difference Prediction in Spot Welding
+In spot welding, high temperature difference usually results
+in a poor-quality weld. The objective of this study is to accu-
+rately predict temperature increase using process variables.
+To validate our proposed PWL framework, we conducted
+extensive spot-welding experiments using an Electric X-type
+Welding Gun with a 75-kVA capacity and 50Hz frequency.
+During welding, in-line measurements of voltage, current, and
+pressure variations were recorded. The nugget formation and
+temperature of the welding zone were monitored using an
+infrared camera (TACHYON 1024 µCAMERA). Spherical tip
+electrodes made of CuCrZr alloy conforming to DIN 44750,
+Part 1, were used, and the electrode tips were replaced every
+5 welds to avoid alloying and eliminate potential deformations.
+The electrodes had a ball radius of 75mm and a diameter
+of 20mm. For the workpieces, we used uncoated steel plates
+commonly used in the automotive industry, specifically low
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 11 =====
+2016
+IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+carbon EED quality steel (St1203 according to DIN1623), cut
+into 20 × 40-mm pieces with a thickness varying between
+1 and 3mm. To prepare the specimens, the front face of each
+welded pair was ground flat with a file and finished with a
+600x abrasive.
+There are four controllable variables in the welding process:
+force [kN] (x1), current [kA] (x2), time of weld [s] (x3),
+mass [g] (x4), and the objective is to predict the temperature
+difference on a part [1T ]( ) given input setting. The time of
+weld represents the length of time during which the welding
+process is actively conducted on the workpiece. Process data
+are obtained from 35 welding experiments we conducted
+using a Latin Hypercube design over the range of controllable
+parameters. The physics-based model η(., .) is represented by
+a mathematical equation that has a set of input variables that
+are different from the experiment as follows:
+1T = I 2 · ρ · L · t
+A · m · C p
+,
+(13)
+where
+I: current [kA],
+t: time of weld [s],
+m: mass [g],
+ρ : Resistivity [ohm/m],
+C p : thermal conductivity [W/mK],
+L: Length of path [m],
+A: Cross sectional area [m].
+We can observe that the physics-based model includes
+three of the controllable variables from our process setting
+(i.e., x2, x3, x4), which we refer to in PWL as x ph, and
+the variables that are only included in the process setting
+(i.e., x1) are referred to as x pr. On the other hand, there
+are some parameters that are only included in the physics-
+based model, which PWL refers to as θ. We calibrate the
+physics-based model to our process samples according to the
+two-step procedure we described in Eq. 12. The physics-based
+model shows a good correlation with our process samples of
+0.884, however a poor predictive performance with RMSE of
+72.8. This type of physics-based model represents a desirable
+candidate for our PWL framework. In the first experiment,
+we will compare PWL performance with the benchmarking
+methods described in Section IV. We will use the 35 available
+samples and 35 samples from the physics equation using the
+same variable setting in process, and report the 5-fold cross
+validation mean and standard deviation performance of RMSE,
+MSE, and MAE from 5 random runs. Table III shows the
+performance recorded in our experiment. PWL performance
+in all metrics is superior to competing models. PWL not
+only has the smallest mean in all metrics, but also shows
+good robustness with small standard deviation compared to
+competing models.
+To assess the impact of excluding variables such as
+force, we can compare the performance of the standalone
+physics-based model against that of the comprehensive PWL
+model, as shown in Table III. This comparison not only
+underscores the limitations of the physics-based model when
+used in isolation but also demonstrates the improved accuracy
+and reliability achieved through its seamless integration with
+TABLE III
+PWL PERFORMANCE VS. COMPETING MODELS ON CASE STUDY A
+TABLE IV
+PWL PERFORMANCE VS. SEMI-SUPERVISED LEARNING MODELS ON
+CASE STUDY A
+machine learning. Such an analysis provides valuable insights
+into the roles of missing variables in the physics-based model
+and the overall effectiveness of our PWL approach, thereby
+offering a more holistic understanding of temperature differ-
+ences in spot welding.
+Another aspect of PWL that we want to explore particularly
+in this case study is the performance under limited labeled data
+availability. The number of labeled samples provided in this
+case study is 35, which is considered a small number to fully
+understand predictors-response relationship. This phenomenon
+is very common especially in experiments that require the sam-
+ple to be destroyed in some process setting to get a response
+reading. Hence, a model such as PWL that requires only a
+few labeled samples and is able to exploit unlabeled samples
+is highly desirable in this setting. Therefore, we will compare
+PWL performance with models that can utilize labeled and
+unlabeled samples in training such as semi-supervised learning
+models. The models to be compared with are CoReg [58],
+ICT [54], 5 Model [36], and Mean Teacher [53]. Among the
+35 labeled samples, we will consider only 15 to be labeled and
+the rest as unlabeled. We conducted 5 random runs and the
+performance on the unlabeled samples is reported in Table IV.
+We can observe in Table IV that PWL performance is
+superior in mean RMSE, MSE and MAE over all competing
+models. PWL also shows a smaller standard deviation in all
+of the three metrics in Table IV, which indicates a more
+stable performance. Based on the observations in Tables III
+and IV, semi-supervised models demonstrated statistically
+significant superior performance compared to certain fully
+supervised models, particularly GBDT and DT. This outcome
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 12 =====
+ALENEZI et al.: PHYSICS-INFORMED WEAKLY-SUPERVISED LEARNING FOR QUALITY PREDICTION
+2017
+TABLE V
+PWL PERFORMANCE VS. COMPETING MODELS ON CASE STUDY B
+is often observed in scenarios with limited data availability.
+Semi-supervised models excel by utilizing both labeled and
+unlabeled data, thereby providing a more holistic understand-
+ing of the dataset than fully supervised models, which rely
+exclusively on labeled data. In contrast, fully supervised
+models such as GBDT and DT are more prone to overfitting
+when faced with a data-limited situations.
+B. Nugget Diameter Prediction in Spot Welding
+In this section, we consider the spot-welding experiment
+given in [3] and [27]. There are three variables in this
+TABLE VI
+PWL PERFORMANCE VS. SEMI-SUPERVISED LEARNING MODELS ON
+CASE STUDY B
+process: load (x1), current (x2), and gage (x3), and the
+objective is to optimize the nugget diameter of the weld
+(y). The physics-based model is quite complex and contains
+one calibration parameter (θ) additional to the three vari-
+ables in the process. The physics-based model uses coupled
+partial differential equations to represent thermal, electrical,
+and mechanical interactions, implemented via the ANSYS
+commercial code, as detailed in [3].
+The first step is to approximate the physics-based model.
+Because there is no random error in the physics-based com-
+puter simulation model, an interpolating model such as kriging
+is suitable for the model approximation [49]. We fit an
+ordinary kriging model with Gaussian correlation function
+using the 35 simulations in Table III of [3]. Afterwards, the
+produced physics-based model is calibrated to the process
+samples described in Table IV of [3] according to the two-step
+procedure we described in Eq. 12. The process samples in [3]
+represent 12 experimental settings with 10 replicates per
+setting. In this case study, we obtained more process samples,
+120 in total, than the previous case study. Thus, we are able
+to test PWL performance under low and high data availability
+scenarios. We will compare two scenarios, one with only
+10 labeled process samples in training and the other with
+100 process samples in training. The remaining samples are
+used for testing, and we will conduct five random splits to
+report the mean and the standard deviation of RMSE, MSE,
+and MAE.
+Table V shows PWL performance compared to benchmarks
+under the two data availability scenarios. Generally, the best
+MSE value should be the closest to the variance of noise
+in data which was estimated to be 0.2 from the replicates.
+PWL achieved this desired MSE performance with a value of
+0.206 under the scenario with 100 labeled samples in training.
+We can also observe that PWL outperforms the benchmarking
+methods in all performance metrics under the scenario of
+limited data availability.
+In the results in Table VI, the PWL model consistently
+outperforms other models for both 10 and 100 labeled samples,
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 13 =====
+2018
+IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+showcasing superior average performance and greater consis-
+tency across different runs as indicated by its low standard
+deviations. Among the semi-supervised models, their perfor-
+mances are relatively close, especially with a smaller labeled
+dataset which suggests comparable benefits in their strategies
+of leveraging unlabeled data. Furthermore, the performance of
+PWL improves more significantly with the increase in labeled
+samples compared to the other methods. This indicates that
+PWL is effective at utilizing unlabeled data and scales well
+with more labeled data.
+VI. CONCLUSION
+In this paper, we introduce a novel methodology to enhance
+ML model performance in manufacturing processes utilizing
+the weak supervision paradigm. Traditional methods relying
+on expensive, time-consuming labeled datasets have limi-
+tations, which we overcome by integrating partial physical
+knowledge, significantly improving model performance. Our
+approach is validated by comprehensive simulations and two
+case studies, demonstrating robustness across various noise
+levels and numbers of labeled samples, while also highlighting
+the immense potential of our proposed method in diverse
+manufacturing processes.
+Methodologically, our approach offers several advantages,
+including substantial improvements in predictive performance
+and efficient optimization via the ADMM algorithm. This
+paper establishes that weak supervision is a promising alter-
+native to conventional approaches for enhancing the accuracy
+of ML models in manufacturing processes, especially when
+labeled datasets are either unavailable or prohibitively expen-
+sive to acquire.
+In summary, our methodology holds the potential to reduce
+costs, increase efficiency, and improve in-process quality in
+manufacturing processes. The findings of this study open up
+exciting new directions for future research. A direct extension
+could involve adapting our flexible PWL model to manage
+more complex or higher-dimensional outputs, while addressing
+the new challenges that such outputs may present. Further-
+more, our framework could be expanded to tackle intrinsic
+uncertainties in some physics-based models. For instances
+where the output variable is within a known range at a
+given confidence, the PWL framework might be adapted
+by integrating techniques like weighted loss functions, soft
+constraints on predictions, and probabilistic outputs, though
+these enhancements may add complexity to optimization.
+Researchers can also explore our approach’s applicability in
+other fields with scarce labeled data, such as non-destructive
+testing or predictive maintenance. There is also potential for
+integrating our framework with advanced machine learning
+techniques such as deep learning and reinforcement learning
+to improve predictive performance; or with weak supervision
+methods like crowdsourcing or semi-supervised learning to
+build robust models with limited labeled data. Lastly, exam-
+ining the impact of incorporating domain-specific knowledge,
+such as expert heuristics or insights from materials science,
+could further improve the method’s effectiveness in the man-
+ufacturing domain.
+REFERENCES
+[1] R. Baraniuk, M. Davenport, R. DeVore, and M. Wakin, “A simple proof
+of the restricted isometry property for random matrices,” Constructive
+Approximation, vol. 28, no. 3, pp. 253–263, Dec. 2008.
+[2] L. S. Bastos and A. O’Hagan, “Diagnostics for Gaussian process
+emulators,” Technometrics, vol. 51, no. 4, pp. 425–438, Nov. 2009.
+[3] M. J. Bayarri et al., “A framework for validation of computer models,”
+Technometrics, vol. 49, no. 2, pp. 138–154, May 2007.
+[4] A. Blum and S. Chawla, “Learning from labeled and unlabeled data
+using graph mincuts,” Dept. Comput. Sci., Columbia Univ., New York,
+NY, USA, 2001.
+[5] R. Bruno. (Jan. 4, 2022). Tuffaloy Resistance Welding Products.
+Accessed: Mar. 22, 2023. [Online]. Available: https://www.tuffaloy.com/
+[6] R. Cang, H. Li, H. Yao, Y. Jiao, and Y. Ren, “Improving direct physical
+properties prediction of heterogeneous materials from imaging data
+via convolutional neural network and a morphology-aware generative
+model,” Comput. Mater. Sci., vol. 150, pp. 212–221, Jul. 2018.
+[7] P. Chakravarti, M. Kuusela, J. Lei, and L. Wasserman, “Model-
+independent detection of new physics signals using interpretable
+semi-supervised classifier tests,” 2021, arXiv:2102.07679.
+[8] O. Chapelle, B. Schölkopf, and A. Zien, “A discussion of semi-
+supervised learning and transduction,” in Semi-Supervised Learning.
+Cambridge, MA, USA: MIT Press, 2006, pp. 473–478.
+[9] O. Chapelle and A. Zien, “Semi-supervised classification by low den-
+sity separation,” in Proc. Int. Workshop Artif. Intell. Statist., 2005,
+Paper R5:57-64.
+[10] Y. Chen and J. Z. Wang, “Image categorization by learning and reasoning
+with regions,” J. Mach. Learn. Res., vol. 5, pp. 913–939, Aug. 2004.
+[11] Z. Chen, J. Gao, W. Wang, and Z. Yan, “Physics-informed gen-
+erative
+neural
+network:
+An
+application
+to
+troposphere
+tempera-
+ture prediction,” Environ. Res. Lett., vol. 16, no. 6, Jun. 2021,
+Art. no. 065003.
+[12] Y. Cheng and L.-Y. Fu, “Nonlinear seismic inversion by physics-
+informed Caianiello convolutional neural networks for overpressure
+prediction of source rocks in the offshore Xihu depression, East China,”
+J. Petroleum Sci. Eng., vol. 215, Aug. 2022, Art. no. 110654.
+[13] M. Cranmer et al., “Discovering symbolic models from deep learning
+with inductive biases,” in Proc. Adv. Neural Inf. Process. Syst., vol. 33,
+2020, pp. 17429–17442.
+[14] A. Daw, A. Karpatne, W. D. Watkins, J. S. Read, and V. Kumar,
+“Physics-guided neural networks (PGNN): An application in lake tem-
+perature modeling,” in Knowledge Guided Machine Learning. London,
+U.K.: Chapman & Hall, 2022, pp. 353–372.
+[15] A. Daw, R. Q. Thomas, C. C. Carey, J. S. Read, A. P. Appling, and
+A. Karpatne, “Physics-guided architecture (PGA) of neural networks
+for quantifying uncertainty in lake temperature modeling,” in Proc.
+SIAM Int. Conf. Data Mining, 2020, pp. 532–540.
+[16] T. G. Dietterich, R. H. Lathrop, and T. Lozano-Pérez, “Solving the
+multiple instance problem with axis-parallel rectangles,” Artif. Intell.,
+vol. 89, nos. 1–2, pp. 31–71, Jan. 1997.
+[17] D. L. Donoho, “Compressed sensing,” IEEE Trans. Inf. Theory, vol. 52,
+no. 4, pp. 1289–1306, Apr. 2006.
+[18] N. B. Erichson, M. Muehlebach, and M. W. Mahoney, “Physics-
+informed autoencoders for Lyapunov-stable fluid flow prediction,” 2019,
+arXiv:1905.10866.
+[19] D. F. Alenezi, H. Shi, and J. Li, “A ranking-based weakly supervised
+learning model for telemonitoring of Parkinson’s disease,” IISE Trans.
+Healthcare Syst. Eng., vol. 12, no. 4, pp. 322–336, Oct. 2022.
+[20] A. B. Farimani, J. Gomes, and V. S. Pande, “Deep learning the physics
+of transport phenomena,” 2017, arXiv:1709.02432.
+[21] J. Foulds and E. Frank, “A review of multi-instance learning assump-
+tions,” Knowl. Eng. Rev., vol. 25, no. 1, pp. 1–25, Mar. 2010.
+[22] B. Frenay and M. Verleysen, “Classification in the presence of label
+noise: A survey,” IEEE Trans. Neural Netw. Learn. Syst., vol. 25, no. 5,
+pp. 845–869, May 2014.
+[23] A. Fujino, N. Ueda, and K. Saito, “A hybrid generative/discriminative
+approach to semi-supervised classifier design,” in Proc. Nat. Conf. Artif.
+Intell., vol. 20, no. 2, 2005, pp. 764–769.
+[24] S. Greydanus, M. Dzamba, and J. Yosinski, “Hamiltonian neural net-
+works,” in Proc. Adv. Neural Inf. Process. Syst., vol. 32, 2019.
+[25] S. Guo et al., “Machine learning for metal additive manufacturing:
+Towards a physics-informed data-driven paradigm,” J. Manuf. Syst.,
+vol. 62, pp. 145–163, Jan. 2022.
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+===== PAGE 14 =====
+ALENEZI et al.: PHYSICS-INFORMED WEAKLY-SUPERVISED LEARNING FOR QUALITY PREDICTION
+2019
+[26] J. Herrero-Garcia, R. Patrick, and A. Scaffidi, “A semi-supervised
+approach to dark matter searches in direct detection data with machine
+learning,” J. Cosmology Astroparticle Phys., vol. 2022, no. 2, p. 39,
+Feb. 2022.
+[27] D. Higdon, M. Kennedy, J. C. Cavendish, J. A. Cafeo, and R. D. Ryne,
+“Combining field data and computer simulations for calibration and pre-
+diction,” SIAM J. Sci. Comput., vol. 26, no. 2, pp. 448–466, Jan. 2004.
+[28] C. J. Hillar and F. T. Sommer, “When can dictionary learning uniquely
+recover sparse data from subsamples?” IEEE Trans. Inf. Theory, vol. 61,
+no. 11, pp. 6290–6297, Nov. 2015.
+[29] G. Hinton, O. Vinyals, and J. Dean, “Distilling the knowledge in a neural
+network,” 2015, arXiv:1503.02531.
+[30] X. Jia et al., “Physics guided RNNs for modeling dynamical systems:
+A case study in simulating lake temperature profiles,” in Proc. SIAM Int.
+Conf. Data Mining, 2019, pp. 558–566.
+[31] T. Joachims, “Transductive inference for text classification using support
+vector machines,” in Proc. ICML, 1999, pp. 200–209.
+[32] B. Kapusuzoglu and S. Mahadevan, “Physics-informed and hybrid
+machine learning in additive manufacturing: Application to fused fil-
+ament fabrication,” JOM, vol. 72, no. 12, pp. 4695–4705, Dec. 2020.
+[33] G. E. Karniadakis, I. G. Kevrekidis, L. Lu, P. Perdikaris, S. Wang,
+and L. Yang, “Physics-informed machine learning,” Nature Rev. Phys.,
+vol. 3, no. 6, pp. 422–440, 2021.
+[34] A. Karpatne et al., “Theory-guided data science: A new paradigm for
+scientific discovery from data,” IEEE Trans. Knowl. Data Eng., vol. 29,
+no. 10, pp. 2318–2331, Oct. 2017.
+[35] M. C. Kennedy and A. O’Hagan, “Bayesian calibration of com-
+puter models,” J. Roy. Stat. Soc. B, Stat. Methodol., vol. 63, no. 3,
+pp. 425–464, Sep. 2001.
+[36] S. Laine and T. Aila, “Temporal ensembling for semi-supervised learn-
+ing,” 2016, arXiv:1610.02242.
+[37] M. Leonesio and L. Fagiano, “A semi-supervised physics-informed clas-
+sifier for centerless grinding operations,” in Proc. IEEE Conf. Control
+Technol. Appl. (CCTA), Aug. 2022, pp. 977–982.
+[38] Y.-F. Li, I. W. Tsang, J. T. Kwok, and Z.-H. Zhou, “Convex and
+scalable weakly labeled SVMs,” J. Mach. Learn. Res., vol. 14, no. 7,
+pp. 2151–2188, 2013.
+[39] M. Lutter, C. Ritter, and J. Peters, “Deep Lagrangian networks: Using
+physics as model prior for deep learning,” 2019, arXiv:1907.04490.
+[40] C. Meng, S. Seo, D. Cao, S. Griesemer, and Y. Liu, “When physics meets
+machine learning: A survey of physics-informed machine learning,”
+2022, arXiv:2203.16797.
+[41] K. J. Montes, C. Rea, R. A. Tinguely, R. Sweeney, J. Zhu, and
+R. S. Granetz, “A semi-supervised machine learning detector for physics
+events in tokamak discharges,” Nucl. Fusion, vol. 61, no. 2, Feb. 2021,
+Art. no. 026022.
+[42] N. Muralidhar et al., “PhyNet: Physics guided neural networks for
+particle drag force prediction in assembly,” in Proc. SIAM Int. Conf.
+Data Mining, 2020, pp. 559–567.
+[43] M. A. Nabian and H. Meidani, “Physics-driven regularization of
+deep neural networks for enhanced engineering design and analysis,”
+J. Comput. Inf. Sci. Eng., vol. 20, no. 1, Feb. 2020, Art. no. 011006.
+[44] K. Nigam, A. K. McCallum, S. Thrun, and T. Mitchell, “Text classifica-
+tion from labeled and unlabeled documents using EM,” Mach. Learn.,
+vol. 39, pp. 103–134, May 2000.
+[45] D. S. Oliver and M. Alfonzo, “Calibration of imperfect models to biased
+observations,” Comput. Geosci., vol. 22, no. 1, pp. 145–161, Feb. 2018.
+[46] N. Parikh and S. Boyd, “Proximal algorithms,” Found. Trends Optim.,
+vol. 1, no. 3, pp. 127–239, 2014.
+[47] M. Raissi, P. Perdikaris, and G. E. Karniadakis, “Physics-informed
+neural networks: A deep learning framework for solving forward and
+inverse problems involving nonlinear partial differential equations,”
+J. Comput. Phys., vol. 378, pp. 686–707, Feb. 2019.
+[48] J. S. Read et al., “Process-guided deep learning predictions of lake
+water temperature,” Water Resour. Res., vol. 55, no. 11, pp. 9173–9190,
+Nov. 2019.
+[49] J. Sacks, W. J. Welch, T. J. Mitchell, and H. P. Wynn, “Design and
+analysis of computer experiments,” Stat. Sci., vol. 4, no. 4, pp. 409–453,
+Nov. 1989.
+[50] B. Settles, “Active learning literature survey,” Dept. Comput. Sci., Univ.
+Wisconsin, Madison, Spain, Tech. Rep. 1648, 2009.
+[51] Q. Shi, D. Gu, M. Xia, S. Cao, and T. Rong, “Effects of laser processing
+parameters on thermal behavior and melting/solidification mechanism
+during selective laser melting of TiC/Inconel 718 composites,” Opt.
+Laser Technol., vol. 84, pp. 9–22, Oct. 2016.
+[52] Resistance Welding—Peel and Chisel Testing of Resistance Spot and
+Projection Welds, ISO Standard 10447, Geneva, Switzerland, 2006.
+[53] A. Tarvainen and H. Valpola, “Mean teachers are better role mod-
+els: Weight-averaged consistency targets improve semi-supervised deep
+learning results,” in Proc. Adv. Neural Inf. Process. Syst., vol. 30, 2017.
+[54] V. Verma et al., “Interpolation consistency training for semi-supervised
+learning,” Neural Netw., vol. 145, pp. 90–106, Jan. 2022.
+[55] H. Wang, B. Li, and F.-Z. Xuan, “A dimensionally augmented and
+physics-informed machine learning for quality prediction of additively
+manufactured high-entropy alloy,” J. Mater. Process. Technol., vol. 307,
+Sep. 2022, Art. no. 117637.
+[56] B. Zhou, T. Pychynski, M. Reischl, and R. Mikut, “Comparison of
+machine learning approaches for time-series-based quality monitoring
+of resistance spot welding (RSW),” Arch. Data Sci. A, vol. 5, no. 1,
+p. 13, 2018.
+[57] Z.-H. Zhou, “A brief introduction to weakly supervised learning,” Nat.
+Sci. Rev., vol. 5, no. 1, pp. 44–53, Jan. 2018.
+[58] Z.-H. Zhou and M. Li, “Semi-supervised regression with co-training,”
+in Proc. IJCAI, 2005, pp. 908–913.
+[59] Z.-H. Zhou and M. Li, “Semi-supervised learning by disagreement,”
+Knowl. Inf. Syst., vol. 24, no. 3, pp. 415–439, Sep. 2010.
+Dhari F. Alenezi (Member, IEEE) received the B.S. degree in industrial and
+management systems engineering from Kuwait University, Kuwait, in 2016.
+He is currently pursuing the Ph.D. degree with the H. Milton Stewart of
+Industrial and Systems Engineering, Georgia Institute of Technology. His
+research interest focuses on applying weakly-supervised machine learning
+techniques to enhance telehealth capabilities and optimize the quality of
+manufacturing processes.
+Michael Biehler (Member, IEEE) received the B.S. and M.S. degrees in
+industrial engineering and management from Karlsruhe Institute of Technol-
+ogy (KIT) in 2017 and 2020, respectively. He is currently pursuing the Ph.D.
+degree with the H. Milton Stewart School of Industrial and Systems Engineer-
+ing, Georgia Institute of Technology. His research interests include interface
+between machine learning and cyber physical (manufacturing) systems, where
+he aims to develop methods for cyber security, monitoring, prognostics, and
+control. He is a member of ASME, ENBIS, IISE, INFORMS, and SIAM.
+Jianjun Shi received the B.S. and M.S. degrees in automation from Beijing
+Institute of Technology in 1984 and 1987, respectively, and the Ph.D. degree
+in mechanical engineering from the University of Michigan in 1992. Currently,
+he is the Carolyn J. Stewart Chair and a Professor with the H. Milton
+Stewart School of Industrial and Systems Engineering, Georgia Institute of
+Technology. His research interests include the fusion of advanced statistical
+and domain knowledge to develop methodologies for modeling, monitoring,
+diagnosis, and control for complex manufacturing systems. He is a fellow
+of the Institute of Industrial and Systems Engineers (IISE), the American
+Society of Mechanical Engineers (ASME), and the Institute for Operations
+Research and the Management Sciences (INFORMS); an Elected Member
+of the International Statistics Institute (ISI); a Life Member of ASA; an
+Academician of the International Academy for Quality (IAQ); and a member
+of the National Academy of Engineers (NAE).
+Jing Li (Member, IEEE) received the B.S. degree from Tsinghua University,
+Beijing, China, in 2000, and the M.A. degree in statistics and the Ph.D. degree
+in industrial and operations engineering from the University of Michigan,
+Ann Arbor, MI, USA, in 2005 and 2007, respectively. She is currently the
+Virginia C. and Joseph C. Mello Chair and a Professor with the H. Milton
+Stewart School of Industrial and Systems Engineering, Georgia Institute of
+Technology, Atlanta, GA, USA. Her research interests are statistical modeling
+and machine learning for health and manufacturing applications. She is a
+member of IISE and INFORMS. She was a recipient of NSF CAREER Award.
+Authorized licensed use limited to: Shenyang Institute of Automation. Downloaded on July 09,2026 at 08:28:48 UTC from IEEE Xplore.  Restrictions apply. 

@@ -1,0 +1,261 @@
+
+
+===== PAGE 1 =====
+1 
+IEEE TRANSCATIONS ON AUTOMATION SCIENC AND ENGINEERING, VOL. X, NO. X, XXX 2023 
+ 
+SUPPLEMENTARY MATERIALS 
+Thes supplementary materials sections are structured as 
+follows: section. A details proposition related to the 𝒈𝒈 update, 
+section. B details proposition related the 𝜽𝜽 update, and section. 
+C details proposition related to identifiability requirement.  
+A. 𝒈𝒈 Update 
+Proposition 1. Let 𝑓𝑓1(𝒈𝒈) = ‖𝒀𝒀−𝑯𝑯𝟏𝟏𝒈𝒈−𝑩𝑩𝟏𝟏𝒅𝒅‖𝑭𝑭
+𝟐𝟐,  𝑓𝑓2(𝒈𝒈) =
+𝜆𝜆1‖𝑯𝑯𝟐𝟐𝒈𝒈−𝜼𝜼෥]‖𝑭𝑭
+𝟐𝟐, 𝑓𝑓3(𝒈𝒈) = 𝜆𝜆2‖𝒈𝒈‖𝟏𝟏, 𝑎𝑎𝑎𝑎𝑎𝑎  𝑓𝑓4(𝒈𝒈) =
+𝜆𝜆3 ∑
+ฮ𝒈𝒈𝒒𝒒ฮ𝟐𝟐
+(𝒒𝒒𝟏𝟏+𝒒𝒒𝟑𝟑)
+𝒒𝒒=𝟏𝟏
+. The proximal operators of proximal 
+operators of ∆𝒇𝒇𝟏𝟏, … ∆𝒇𝒇𝟒𝟒 are given as follows: Let 𝒛𝒛 and 𝒂𝒂 have 
+the same size as 𝒈𝒈. 
+1) If 𝒛𝒛= prox∆𝑓𝑓1[𝒂𝒂], we have  
+prox∆𝑓𝑓1[𝒂𝒂] = ൫𝐈𝐈+ ∆𝑯𝑯𝟏𝟏
+⊤𝑯𝑯𝟏𝟏൯
+−𝟏𝟏ቀ𝒂𝒂+ ∆𝑯𝑯𝟏𝟏
+⊤(𝐘𝐘−
+𝑩𝑩𝟏𝟏𝒅𝒅)ቁ, where 𝐈𝐈 is the identity matrix of order p.  
+2) If 𝒛𝒛= prox∆𝑓𝑓2[𝒂𝒂], we have  
+prox∆𝑓𝑓2[𝒂𝒂] = ൫𝐈𝐈+ λ1∆𝑯𝑯𝟐𝟐
+⊤𝑯𝑯𝟐𝟐൯
+−𝟏𝟏൫𝒂𝒂+ λ1∆𝑯𝑯𝟐𝟐
+⊤𝜼𝜼෥൯, 
+where 𝐈𝐈 is the identity matrix of order p.  
+3) If 𝒛𝒛= prox∆𝑓𝑓3[𝒂𝒂], we have 
+prox∆𝑓𝑓3[𝒂𝒂] = 𝑆𝑆𝜆𝜆2∆(𝒂𝒂) = ൝
+𝒂𝒂−𝝀𝝀𝟐𝟐∆, 𝒂𝒂> 𝝀𝝀𝟐𝟐∆
+𝟎𝟎, −𝝀𝝀𝟐𝟐∆≤𝒂𝒂≤𝝀𝝀𝟐𝟐∆
+𝒂𝒂+ 𝝀𝝀𝟐𝟐∆, 𝒂𝒂≤𝝀𝝀𝟐𝟐∆ .
+ 
+4) If 𝒛𝒛= prox∆𝑓𝑓4[𝒂𝒂], we have  
+prox∆𝑓𝑓4[𝒂𝒂] = ൤𝟏𝟏−𝝀𝝀𝟑𝟑∆
+‖𝒂𝒂‖𝟐𝟐
+൨
++
+𝒂𝒂 . 
+Proof 
+ 
+The proximal operator of ∆𝑓𝑓1: The 𝑓𝑓1(𝒈𝒈) can be written as a 
+least square form as follows: 
+𝑓𝑓1(𝒈𝒈) = ‖𝐘𝐘−𝑯𝑯𝟏𝟏𝒈𝒈−𝑩𝑩𝟏𝟏𝒅𝒅‖𝑭𝑭
+𝟐𝟐= ‖(𝐘𝐘−𝑩𝑩𝟏𝟏𝒅𝒅) −𝑯𝑯𝟏𝟏𝒈𝒈‖𝑭𝑭
+𝟐𝟐 . 
+According to [46], the proximal operator for 𝑞𝑞(𝑥𝑥) =
+‖𝑐𝑐−Px‖2
+2 can be written as follows: 
+prox∆𝑞𝑞[𝐱𝐱] = argmin
+𝐭𝐭
+൜∆𝑞𝑞(𝐭𝐭) + 1
+2 ‖𝐭𝐭−𝐱𝐱‖𝟐𝟐
+𝟐𝟐ൠ
+= (𝐈𝐈+ ∆𝐏𝐏⊤𝐏𝐏)−1(𝐱𝐱+ ∆𝐏𝐏⊤𝐜𝐜) 
+In our setting, 𝐏𝐏= 𝑯𝑯𝟏𝟏, 𝐜𝐜= (𝐘𝐘−𝑩𝑩𝟏𝟏𝒅𝒅), hence we have, 
+prox∆𝑓𝑓1[𝒂𝒂] = ൫𝐈𝐈+ ∆𝑯𝑯𝟏𝟏
+⊤𝑯𝑯𝟏𝟏൯
+−1(𝒂𝒂+ ∆𝑯𝑯𝟏𝟏
+⊤(𝐘𝐘−𝑩𝑩𝟏𝟏𝒅𝒅)) 
+The proximal operator of ∆𝑓𝑓2: The 𝒇𝒇𝟐𝟐(𝒈𝒈) can be written in a 
+similar format as 𝒇𝒇𝟏𝟏(𝒈𝒈), hence, by setting 𝐏𝐏= 𝑯𝑯𝟐𝟐, 𝐜𝐜= 𝜼𝜼෥, we 
+have 
+prox∆𝑓𝑓2[𝒂𝒂] = ൫𝐈𝐈+ λ1∆𝑯𝑯𝟐𝟐
+⊤𝑯𝑯𝟐𝟐൯
+−1(𝒂𝒂+ λ1∆𝑯𝑯𝟐𝟐
+⊤𝜼𝜼෥) 
+The proximal operator of ∆𝑓𝑓3: This can be obtained from the 
+proximal operator of 𝑙𝑙1 norm, and it is given in [46] and can be 
+applied in our setting as follows: 
+prox∆𝑓𝑓3[𝒂𝒂] = 𝑺𝑺𝜆𝜆2∆(𝒂𝒂) = ൝
+𝒂𝒂−𝜆𝜆2∆, 𝒂𝒂> 𝜆𝜆2∆
+𝟎𝟎, −𝜆𝜆2∆≤𝒂𝒂≤𝜆𝜆2∆
+𝒂𝒂+ 𝜆𝜆2∆, 𝒂𝒂≤𝜆𝜆2∆
+ 
+The proximal operator of ∆𝑓𝑓4: This term is the sum of 𝑙𝑙2 
+norms. By the separable property of the proximal operator, the 
+result follows from the proximal operator of 𝑙𝑙2 norms given in 
+[46] as: 
+prox∆𝑓𝑓4[𝒂𝒂] = ൤1 −𝜆𝜆3∆
+‖𝒂𝒂‖𝟐𝟐
+൨
++
+𝒂𝒂 
+B. 𝜽𝜽 Update 
+Proposition 2. Let 𝑓𝑓1(𝒈𝒈) = ‖𝐘𝐘−𝑯𝑯𝟏𝟏𝒈𝒈−𝑩𝑩𝟏𝟏𝒅𝒅‖𝑭𝑭
+𝟐𝟐,  𝑓𝑓2(𝒈𝒈) =
+𝜆𝜆1‖𝑯𝑯𝟐𝟐𝒈𝒈−𝜼𝜼෥]‖𝑭𝑭
+𝟐𝟐 𝑎𝑎𝑎𝑎𝑎𝑎 𝑓𝑓3(𝒈𝒈) = ∑
+𝑰𝑰𝝎𝝎𝑳𝑳𝒌𝒌≤ 𝜽𝜽𝒌𝒌≤𝝎𝝎𝑼𝑼𝒌𝒌
+𝒒𝒒𝟑𝟑
+𝒌𝒌
+. The proximal 
+operators of proximal operators of ∆𝑓𝑓1, … ∆𝑓𝑓3 are given as 
+follows: Let 𝒛𝒛 and 𝒂𝒂 have the same size as 𝜃𝜃. 
+1) If 𝒛𝒛= prox∆𝑓𝑓1[𝒂𝒂], we have  
+prox∆𝑓𝑓1[𝒂𝒂] = (𝐈𝐈+ ∆𝒈𝒈𝒈𝒈⊤)−𝟏𝟏(𝒂𝒂+ ∆𝒈𝒈(𝐘𝐘−𝑩𝑩𝟏𝟏𝒅𝒅)⊤), 
+where 𝐈𝐈 is the identity matrix of order p.  
+2) If 𝒛𝒛= prox∆𝑓𝑓2[𝒂𝒂], we have  
+prox∆𝑓𝑓2[𝒂𝒂] = (𝐈𝐈+ λ1∆𝒈𝒈𝒈𝒈⊤)−𝟏𝟏(𝒂𝒂+ λ1∆𝒈𝒈𝜼𝜼෥⊤), where 
+𝐈𝐈 is the identity matrix of order p.  
+3) If 𝒛𝒛= prox∆𝑓𝑓3[𝒂𝒂], we have  
+𝑧𝑧𝑘𝑘= prox∆𝑓𝑓3[𝑎𝑎𝑘𝑘] = 𝑚𝑚𝑚𝑚𝑚𝑚ቄ𝜔𝜔𝐿𝐿𝑘𝑘, 𝑚𝑚𝑚𝑚𝑚𝑚൛𝑎𝑎𝑘𝑘, 𝜔𝜔𝑈𝑈𝑘𝑘ൟቅ. 
+Proof 
+The proximal operator of ∆𝒇𝒇𝟏𝟏: The 𝑓𝑓1(𝜽𝜽) can be written as a 
+least square form and the proximal operator can be found 
+similar to 𝑓𝑓1 in proposition 1 as follows: 
+By setting, 𝐏𝐏= 𝒈𝒈⊤, 𝐜𝐜= (𝐘𝐘−𝑩𝑩𝟏𝟏𝒅𝒅)⊤, 𝐱𝐱= 𝑯𝑯𝟏𝟏
+⊤, we have 
+prox∆𝑓𝑓1[𝒂𝒂] = (𝐈𝐈+ ∆𝒈𝒈𝒈𝒈⊤)−1(𝒂𝒂+ ∆𝒈𝒈(𝐘𝐘−𝑩𝑩𝟏𝟏𝒅𝒅)⊤) 
+The proximal operator of ∆𝒇𝒇𝟐𝟐: The 𝒇𝒇𝟐𝟐(𝜽𝜽) can be written in a 
+similar format as 𝒇𝒇𝟏𝟏(𝒈𝒈), hence, by setting 𝐏𝐏= 𝒈𝒈⊤, 𝐜𝐜= 𝜼𝜼෥⊤,
+𝐱𝐱= 𝑯𝑯𝟐𝟐
+⊤, we have 
+prox∆𝑓𝑓2[𝒂𝒂] = (𝐈𝐈+ λ1∆𝒈𝒈𝒈𝒈⊤)−1(𝒂𝒂+ λ1∆𝒈𝒈𝜼𝜼෥⊤) 
+The proximal operator of ∆𝒇𝒇𝟑𝟑: By the separable property of 
+the proximal operator, the result follows from the proximal 
+operator of box constraints given in [46] as follows: 
+𝑧𝑧𝑘𝑘= prox∆𝑓𝑓3[𝑎𝑎𝑘𝑘] = 𝑚𝑚𝑚𝑚𝑚𝑚ቄ𝜔𝜔𝐿𝐿𝑘𝑘, 𝑚𝑚𝑚𝑚𝑚𝑚൛𝑎𝑎𝑘𝑘, 𝜔𝜔𝑈𝑈𝑘𝑘ൟቅ 
+Another aspect of our algorithm that needs to be discussed is 
+identifiability issues that may arise in evaluating terms on the 
+form 𝑯𝑯𝟏𝟏𝒈𝒈 appearing in (8) for instance. This problem can be 
+cast as a dictionary learning problem since we are in some sense 
+trying to learn a basis matrix, 𝑯𝑯𝟏𝟏, and a sparse coefficints 
+vector, 𝒈𝒈, The success of the dictionary learning method does 
+not require that the patterns in 𝑯𝑯𝟏𝟏 to be orthogonal like PCA, 
+and the reconstructed signal is often evaluated accurately under 
+mild conditions. However, this does not guarantee that 
+dictionary learning can uniquely recover sparse data from 
+samples. Meaning, the uniqueness of the learned basis and 
+sparse coefficients vector is not always guaranteed which may 
+create an identifiability issue. The detailed statistical 
+assumptions that guarantee the identifiability is stated in 
+proposition 3 and further discussed in Appendix C. 
+C. Identifiability Requirement   
+Proposition 3: Let assume 𝒈𝒈 is a vector with at most 𝑘𝑘 ≪
+ 𝑚𝑚 nonzero entries, called 𝑘𝑘-sparse. Assume the basis 𝑯𝑯 is 
+Spark on the vectors 𝒈𝒈 such that: 
+𝑯𝑯𝒈𝒈𝟏𝟏= 𝑯𝑯𝒈𝒈𝟐𝟐 𝑓𝑓𝑓𝑓𝑓𝑓  𝒈𝒈𝟏𝟏, 𝒈𝒈𝟐𝟐∈ℝ𝒎𝒎⇒𝒈𝒈𝟏𝟏= 𝒈𝒈𝟐𝟐 
+ 
+Assuming 𝑯𝑯 is given, and our signal is constructed such that: 
+𝐘𝐘෩= 𝑯𝑯𝑯𝑯 
+where 𝒀𝒀෩= 𝒀𝒀−𝑩𝑩𝟏𝟏𝒅𝒅 
+
+
+===== PAGE 2 =====
+2 
+IEEE TRANSCATIONS ON AUTOMATION SCIENC AND ENGINEERING, VOL. X, NO. X, XXX 2023 
+ 
+a lower bound can be set on the number of samples, 𝑛𝑛, of 𝒀𝒀෩  
+that guarantees unique recovery of sparse vector 𝒈𝒈 from a 
+signal 𝒀𝒀෩ with a given basis matrix 𝑨𝑨 such that: 
+𝑛𝑛≥𝐶𝐶𝐶𝐶log ቀ𝑚𝑚
+𝑘𝑘ቁ 
+where 𝐶𝐶 is a constant independent of 𝑚𝑚, 𝑛𝑛, and 𝑘𝑘 with more 
+detailed discussions and proofs included in [1]. 
+In the case 𝑯𝑯 is unknown, assuming the above holds, we 
+assume we can subsample 𝑵𝑵 similar samples of 𝒀𝒀෩ from our 
+system such that we have 𝒀𝒀෱= {𝒀𝒀෩𝟏𝟏 , … , 𝒀𝒀෩𝑵𝑵}. Then, can 
+guarantee the uniqueness of both 𝒈𝒈 and 𝑯𝑯 if we can guarantee 
+a lower bound on the number of required subsamples 𝑵𝑵 to 
+guarantee uniqueness of 𝑨𝑨 with probability (𝟏𝟏−𝜷𝜷) as follows: 
+𝑵𝑵= 𝒌𝒌+ 𝟏𝟏
+𝜷𝜷
+ቀ𝒎𝒎
+𝒌𝒌ቁ 
+Proof: 
+Consider problem (7) and (8) in our formulation, since 𝜆𝜆1 
+control how much we emphasize on the physics-based model 
+and can be considered as a regularization term, without loss of 
+generality, we consider the case where 𝜆𝜆1 ≈0, and 
+reformulated the two problems as follows: 
+𝒎𝒎𝒎𝒎𝒎𝒎
+𝒈𝒈,𝜽𝜽ฮ‖𝐘𝐘−𝑯𝑯𝟏𝟏𝒈𝒈−𝑩𝑩𝟏𝟏𝒅𝒅‖𝑭𝑭
+𝟐𝟐ฮ𝑭𝑭
+𝟐𝟐+ 𝝀𝝀𝟐𝟐‖𝒈𝒈‖𝟏𝟏
++ 𝝀𝝀𝟑𝟑෍
+ฮ𝒈𝒈𝒒𝒒ฮ𝟐𝟐
+(𝒒𝒒𝟏𝟏+𝒒𝒒𝟑𝟑)
+𝒒𝒒=𝟏𝟏
+ 
+⇒ 𝒎𝒎𝒎𝒎𝒎𝒎
+𝒈𝒈,𝜽𝜽ቛฮ𝐘𝐘෩−𝑯𝑯𝟏𝟏𝒈𝒈ฮ𝑭𝑭
+𝟐𝟐ቛ
+𝑭𝑭
+𝟐𝟐
++ 𝝀𝝀𝟐𝟐‖𝒈𝒈‖𝟏𝟏+ 𝝀𝝀𝟑𝟑෍
+ฮ𝒈𝒈𝒒𝒒ฮ𝟐𝟐
+(𝒒𝒒𝟏𝟏+𝒒𝒒𝟑𝟑)
+𝒒𝒒=𝟏𝟏
+, 
+where 𝐘𝐘෩= 𝐘𝐘−𝑩𝑩𝟏𝟏𝒅𝒅. 
+Our main concern here is under what assumptions when we 
+evaluate our signal 𝐘𝐘෩, we can assume guarantees about the 
+uniqueness of the learned basis 𝑯𝑯𝟏𝟏 and sparse coefficients 
+vector 𝒈𝒈. Assume that observed data 𝐘𝐘෩ were generated as: 
+𝐘𝐘෩= 𝑨𝑨𝑨𝑨
+(14) 
+using a fixed 𝑛𝑛× 𝑚𝑚 basis matrix 𝑨𝑨 and sparse 𝑚𝑚 dimensional 
+latent representations 𝒂𝒂. First, we address the accuracy of the 
+recovered 𝒂𝒂, which mainly concerns the 𝒈𝒈 update in Algorithm 
+1 of our problem. This can be done using theory from 
+compressed sensing (CS) [17], where they have investigated 
+conditions under which the sparse latent representations, 𝒂𝒂, can 
+be recovered from data [1]. Given an m-dimensional vector 𝒂𝒂 
+with at most 𝑘𝑘 ≪ 𝑚𝑚 nonzero entries. Such vectors a are called 
+k-sparse. And given a known basis matrix 𝑨𝑨, a typical condition 
+is: 
+𝑨𝑨𝒂𝒂𝟏𝟏= 𝑨𝑨𝒂𝒂𝟐𝟐 for k sparse 𝒂𝒂𝟏𝟏, 𝒂𝒂𝟐𝟐∈ℝ𝒎𝒎⇒𝒂𝒂𝟏𝟏= 𝒂𝒂𝟐𝟐 
+(15) 
+known as the spark condition.  Another condition is related to 
+the number of samples, 𝑛𝑛, of 𝐘𝐘෩  needs to satisfy: 
+𝑛𝑛≥𝐶𝐶𝐶𝐶log ቀ𝑚𝑚
+𝑘𝑘ቁ,
+(16) 
+where 𝐶𝐶 is a constant independent of 𝑚𝑚, 𝑛𝑛, and 𝑘𝑘 with more 
+detailed discussions and proofs included in [1]. 
+Conditions (17) and (18) describe when it is possible to 
+recover a sparse vector 𝒂𝒂 from a signal 𝐘𝐘෩ with a given or known 
+basis matrix 𝑨𝑨. 
+Second, when the 𝑨𝑨 is unknown, it is more difficult to 
+guarantee the uniqueness of both 𝒂𝒂 and 𝑨𝑨 and requires more 
+conditions. To show this, if 𝑷𝑷 is a permutation matrix and 𝑫𝑫 is 
+an invertible diagonal matrix, then 
+𝑨𝑨𝑨𝑨= (𝑨𝑨𝑫𝑫−𝟏𝟏𝑷𝑷⊤)(𝑷𝑷𝑷𝑷𝑷𝑷),
+(17) 
+where 𝑷𝑷 is a permutation matrix with binary entries and 
+precisely one 1 in each row and column such that 𝑷𝑷𝑷𝑷⊤ =
+ 𝑷𝑷⊤𝑷𝑷 = 𝑰𝑰. Hence, if 𝑨𝑨 is unknown, we cannot discriminate 
+which of 𝒂𝒂 or 𝑷𝑷𝑷𝑷𝑷𝑷 (respectively, 𝑨𝑨 or 𝑨𝑨𝑫𝑫−𝟏𝟏𝑷𝑷⊤) was the 
+original sparse vector or basis matrix, respectively. Suppose 
+that the true signal 𝐘𝐘෩ is created according to (14) and we are 
+trying to evaluate it as follows: 
+𝐘𝐘෡= 𝑩𝑩𝑩𝑩 
+(18) 
+So, we can guarantee the uniqueness of both 𝒂𝒂 and 𝑨𝑨 if we 
+can guarantee that 𝑨𝑨𝑨𝑨= 𝑩𝑩𝑩𝑩 under scenario such that in (17). 
+Suppose in our setting that 𝐘𝐘෩ is sampled from the system and 
+we can subsample 𝑵𝑵 similar samples such that we have 𝐘𝐘෱=
+{𝐘𝐘෩𝟏𝟏 , … , 𝐘𝐘෩𝑵𝑵}. Now assuming each subsample maybe associated 
+with different active patterns in the basis matrix 𝑨𝑨 hence may 
+generate different vectors 𝒂𝒂 such that 𝒂𝒂෭= {𝒂𝒂𝟏𝟏 , … , 𝒂𝒂𝑵𝑵}. 
+Assuming (15) and (16) hold, a lower bound on the number of 
+required subsamples 𝑵𝑵 can be found in [28] to guarantee 
+uniqueness of 𝑨𝑨 with probability (𝟏𝟏−𝜷𝜷) as follows: 
+𝑁𝑁= 𝑘𝑘+ 1
+𝛽𝛽
+ቀ𝑚𝑚
+𝑘𝑘ቁ
+(19) 
+This indicates that sparse matrix factorization of basis matrix 𝑨𝑨 
+is unique for a large enough number of subsamples. 
+ 

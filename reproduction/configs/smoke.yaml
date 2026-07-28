@@ -1,0 +1,69 @@
+# Classification of paper values versus inferred/stability settings:
+# see reproduction/reports/论文内容与非论文修改代码审计.md.
+experiment:
+  seed: 2026
+  sample_sizes: [10, 20, 30, 40]
+  repeats: 2
+  physics_accuracy_targets: [0.85, 0.7, 0.5]
+  physics_accuracy_n_labeled: 40
+  physics_accuracy_baselines: [Ridge]
+  accuracy_calibration_size: 500
+  accuracy_calibration_seed: 9102026
+  accuracy_scale_log10: [-3, 3, 121]
+  accuracy_correlation_tolerance: 0.04
+  accuracy_require_tolerance: true
+  label_savings_pwl_n_labeled: 30
+  label_savings_sizes: [30, 40]
+  label_savings_baselines: [Ridge]
+  equivalence_margin_fraction: 0.10
+
+simulation:
+  n_weak: 40
+  n_test: 80
+  snr: 5.0
+  # Sigma_x is not disclosed. rho=0.9 is an explicit feasibility assumption:
+  # with rho=0.5, the zero-discrepancy correlation cannot reach paper's 0.85.
+  correlation: 0.9
+  discrepancy_scale: 1.0
+  physics_noise_fraction: 0.25
+  singularity_policy: reject_near_pole
+  noise_reference_size: 2000
+  stability:
+    min_abs_x3: 0.15
+    min_abs_x4: 0.15
+    min_abs_x5: 0.15
+    min_abs_eta_denominator: 1.0
+    min_abs_discrepancy_denominator: 0.75
+    max_abs_component: 25.0
+
+train_fraction: 0.7
+refit_on_train_validation: false
+
+lambda_grid:
+  physics: [0.03, 0.3]
+  l1: [0.01]
+  group: [0.01]
+
+model:
+  mapping: identity
+  standardize: true
+  b_profile: compact
+  # Stabilizes the 3 process coefficients when only 7 training labels exist.
+  d_ridge: 10.0
+  selection_rule: physics_one_standard_error
+  n_jobs: 1
+  parallel_verbose: 0
+  admm_rho: 1.0
+  admm_adaptive_rho: true
+  admm_tolerance: 0.0001
+  admm_max_iter: 500
+  bcd_tolerance: 0.001
+  bcd_parameter_tolerance: 0.02
+  bcd_max_iter: 60
+  theta_starts: 1
+  require_convergence: true
+
+baselines: [Ridge, Physics]
+
+protocol:
+  profile: smoke

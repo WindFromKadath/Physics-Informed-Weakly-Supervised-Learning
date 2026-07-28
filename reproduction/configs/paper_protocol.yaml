@@ -1,0 +1,96 @@
+# Computationally expensive: 102,900 PWL fits, plus baseline searches.
+# Audit tags:
+#   [PAPER]      value/protocol stated in the paper or supplement
+#   [INFERRED]   explicit completion of an unpublished implementation detail
+#   [STABILITY]  numerical safeguard or finite-computation policy
+#   [ENGINEERING] runtime, logging, or artifact behavior
+experiment:
+  # [PAPER] Section IV-A uses 10..120 labels, 20 repeats.
+  seed: 2026
+  sample_sizes: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
+  repeats: 20
+  # [PAPER] Section IV-B public targets and labeled-sample count.
+  physics_accuracy_targets: [0.85, 0.7, 0.5]
+  physics_accuracy_n_labeled: 40
+  physics_accuracy_baselines: [Ridge, SVR, DT, GP, GBDT]
+  # [INFERRED] Independent per-repeat Monte Carlo calibration implementation.
+  accuracy_calibration_size: 10000
+  accuracy_calibration_seed: 9102026
+  accuracy_scale_log10: [-3, 3, 1201]
+  accuracy_correlation_tolerance: 0.02
+  accuracy_require_tolerance: true
+  # [PAPER] Section IV-C fixes PWL at 30 labels and scans supervised 30..110.
+  label_savings_pwl_n_labeled: 30
+  label_savings_sizes: [30, 40, 50, 60, 70, 80, 90, 100, 110]
+  label_savings_baselines: [Ridge, SVR, DT, RF, GBDT, GP]
+  # [INFERRED] TOST is an added equivalence analysis, not a paper setting.
+  equivalence_margin_fraction: 0.10
+
+simulation:
+  # [PAPER] Public Section IV sample sizes and SNR.
+  n_weak: 100
+  n_test: 200
+  snr: 5.0
+  # [INFERRED] The paper does not publish Sigma_x.
+  # rho=0.9 makes the disclosed 0.85/0.70/0.50 conditions attainable.
+  correlation: 0.9
+  discrepancy_scale: 1.0
+  # [INFERRED] Physics-noise magnitude is not disclosed.
+  physics_noise_fraction: 0.25
+  # [STABILITY] Rejection is not in the paper and conditions the Gaussian DGP.
+  singularity_policy: reject_near_pole
+  # [INFERRED] Independent SNR-reference population prevents scenario drift.
+  noise_reference_size: 10000
+  # [STABILITY] All pole-distance/magnitude thresholds are reproduction choices.
+  stability:
+    min_abs_x3: 0.15
+    min_abs_x4: 0.15
+    min_abs_x5: 0.15
+    min_abs_eta_denominator: 1.0
+    min_abs_discrepancy_denominator: 0.75
+    max_abs_component: 25.0
+
+# [PAPER] 70/30 training/validation split.
+train_fraction: 0.7
+# [INFERRED] The paper does not disclose whether selection is followed by refit.
+refit_on_train_validation: false
+
+# [INFERRED] The paper does not publish its complete lambda grid.
+lambda_grid:
+  physics: [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+  l1: [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+  group: [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+
+model:
+  # [INFERRED] Paper defines phi and H/B roles, not these concrete choices.
+  mapping: identity
+  # [STABILITY] Undisclosed scaling choice; affects effective lambda strength.
+  standardize: true
+  # [INFERRED] Parsimonious basis: exactly spans equation (11) with 3 columns.
+  b_profile: compact
+  # [STABILITY; OBJECTIVE CHANGE] Nonzero value adds a term absent from Eq. (5).
+  # Set to 0.0 to recover the paper's unregularized d update.
+  d_ridge: 10.0
+  # [INFERRED] Not a published author model-selection rule.
+  selection_rule: physics_one_standard_error
+  # [ENGINEERING] Candidate-level process parallelism; should not change results.
+  n_jobs: 6
+  parallel_verbose: 10
+  parallel_temp_folder: reproduction/.joblib
+  # [INFERRED/STABILITY] ADMM/BCD numerical settings are not disclosed.
+  admm_rho: 1.0
+  admm_adaptive_rho: true
+  admm_tolerance: 0.00001
+  admm_max_iter: 1000
+  bcd_tolerance: 0.0001
+  bcd_parameter_tolerance: 0.01
+  bcd_max_iter: 50
+  theta_starts: 1
+  # [STABILITY] Reject candidates whose inner/outer solves do not converge.
+  require_convergence: true
+
+# [PAPER] Model families; [INFERRED] concrete sklearn grids live in baselines.py.
+baselines: [Ridge, SVR, DT, RF, GBDT, GP, Physics]
+
+protocol:
+  profile: paper
