@@ -1,5 +1,7 @@
 # PWL 论文复现框架（结构性复现）
 
+> 本页保留数学实现、工程假设与复现边界。安装、仿真/案例 B 运行命令及公开仓库导航请先读 [README](README.md)。热传导最新证据见 [迁移说明](../migration/README.md)。
+
 本工程实现 Alenezi 等人在 *Physics-Informed Weakly-Supervised Learning for
 Quality Prediction of Manufacturing Processes* 中提出的 PWL 框架，并将论文未公开
 的实现选择显式配置化。目标是得到一个可运行、可审计、可扩展的复现基线，而不是
