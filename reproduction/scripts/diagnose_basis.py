@@ -50,7 +50,9 @@ def _max_canonical_correlation(left: np.ndarray, right: np.ndarray) -> float:
     q_left, _ = np.linalg.qr(left)
     q_right, _ = np.linalg.qr(right)
     singular_values = np.linalg.svd(q_left.T @ q_right, compute_uv=False)
-    return float(np.max(singular_values))
+    # Orthogonal column spaces give singular values in [0, 1]. QR/SVD
+    # roundoff can exceed 1 by an ulp on some BLAS implementations.
+    return float(np.clip(np.max(singular_values), 0.0, 1.0))
 
 
 def _max_canonical_correlation_centered(left: np.ndarray, right: np.ndarray) -> float:

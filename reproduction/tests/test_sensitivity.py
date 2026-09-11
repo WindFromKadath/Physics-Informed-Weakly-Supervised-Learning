@@ -15,7 +15,7 @@ REPRODUCTION = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPRODUCTION / "scripts"))
 
 from compare_to_paper import PAPER_REFERENCE, compare_results
-from diagnose_basis import diagnose_basis
+from diagnose_basis import _max_canonical_correlation, diagnose_basis
 
 SENSITIVITY_DIR = REPRODUCTION / "configs" / "sensitivity"
 # 现行业务层基线（与 legacy/section_iv_single_full_parallel 数值逐位一致，
@@ -184,3 +184,19 @@ def test_diagnose_basis_compact_b_spans_process_contribution():
     assert np.isfinite(result["h_r2_eta_true"])
     assert np.isfinite(result["h_r2_eta_true_plus_discrepancy"])
     assert 0.0 <= result["max_canonical_correlation_h_b_compact"] <= 1.0
+
+
+def test_canonical_correlation_roundoff_at_shared_space(monkeypatch):
+    # Reproduce the one-ulp overshoot reported by Linux CI regardless of BLAS.
+    monkeypatch.setattr(
+        np.linalg, "svd",
+        lambda *args, **kwargs: np.array([np.nextafter(1.0, np.inf)]),
+    )
+    assert _max_canonical_correlation(np.eye(2), np.eye(2)) == 1.0
+
+
+@pytest.mark.parametrize("correlation", [0.0, 0.6, 1.0])
+def test_canonical_correlation_for_known_angles(correlation):
+    left = np.array([[1.0], [0.0]])
+    right = np.array([[correlation], [np.sqrt(1.0 - correlation**2)]])
+    assert _max_canonical_correlation(left, right) == pytest.approx(correlation)

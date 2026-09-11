@@ -41,7 +41,7 @@ uv run python migration/run_migration.py --config migration/configs/heat_smoke.y
 - 代码、配置、CSV 输入、验收报告、人工报告及依赖锁进入 Git；运行结果、缓存和日志默认不上传，人工冻结的 [v3 基线卡](migration/results/heat_v3_qint_min/BASELINE.md) 是例外。
 - 历史报告中的 `results/` 图表需要在本地生成；公开仓库并不包含每次历史运行的完整产物。
 
-验证方式：运行两部分测试与独立数值检查，见 [当前状态](docs/CURRENT_STATUS.md)。远端 CI 状态以 [Actions](https://github.com/WindFromKadath/Physics-Informed-Weakly-Supervised-Learning/actions) 为准。
+验证方式：在本地运行两部分测试与独立数值检查，见 [当前状态](docs/CURRENT_STATUS.md)。本分支不配置 GitHub Actions 自动测试。
 
 ## 文档与反馈
 

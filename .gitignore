@@ -23,6 +23,7 @@ tmp/
 
 # Local editor and operating-system state
 .vscode/
+.github/workflows/
 .idea/
 .DS_Store
 Thumbs.db
