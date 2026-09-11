@@ -23,7 +23,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 
-from .model import PhysicsModel, calibrate_theta
+from .core.model import PhysicsModel, calibrate_theta
 
 Array = NDArray[np.float64]
 
@@ -131,8 +131,8 @@ class PhysicsGPRegressor:
     """Equation (12) calibration followed by a GP discrepancy model."""
 
     physics_model: PhysicsModel
-    theta_lower: tuple[float, float] = (0.0, 0.0)
-    theta_upper: tuple[float, float] = (1.0, 1.0)
+    theta_lower: tuple[float, ...] = (0.0, 0.0)
+    theta_upper: tuple[float, ...] = (1.0, 1.0)
     random_state: int = 0
 
     def fit(self, x_ph: Array, x_pr: Array, y: Array) -> "PhysicsGPRegressor":

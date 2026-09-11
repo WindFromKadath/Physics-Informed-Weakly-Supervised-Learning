@@ -1,0 +1,36 @@
+# --------------------------------
+# ---- Makevars for SAVE R package
+# ---------------------------------
+
+# --- Commands
+
+#all: 
+#	@ echo "---- Configuring R-SAVE package
+#	make install
+
+# Flags
+#CFLAGS = -g -Wall -pedantic
+# Libraries
+#CLIB      = libCutils.h
+#BLAS      = blaslapack.h
+#COMMON    = common.h
+#CHOL      = chol_pivot.h
+#RANDOM    = random.h
+#HEADERS   = $(CLIB) $(BLAS) $(COMMON) $(CHOL) $(RANDOM)
+
+LIBS  = -L. -L./Library -L/usr/local/lib -L/usr/local/lib/R/lib -lR -l/usr/local/lib/R/include -lCutils -llapack -lblas -lgfortran -lm
+
+SOURCES_C = \
+	bayesfit.c common.c bayesfitSetup.c\
+	setup.c iostuff.c chol_pivot.c predict_code.c predict_reality.c optimize.c
+
+DEPENDS = $(SOURCES_C:.c=.d)
+SOURCES = $(SOURCES_C)
+OBJECTS = $(SOURCES_C:.c=.o)
+HEADERS = \
+	bayesfit.h bayesfitSetup.h common.h \
+        predict_reality.h predict_code.h\
+	setup.h chol_pivot.h optimize.h
+
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+

@@ -1,0 +1,135 @@
+{
+  "spec_version": "v1.3 (1D)",
+  "solver": "1D Kirchhoff BVP + closed form",
+  "n_batches": 10,
+  "total_time_s": 0.21,
+  "finished_at": "2026-08-01 10:47:16",
+  "config": {
+    "R0": 0.03,
+    "sigma": 4.493844638867134,
+    "beta_k": 0.002
+  },
+  "batches": [
+    {
+      "batch": 1,
+      "k_true": 18.239102123042667,
+      "coverage": {
+        "vs_ref_p95": 0.2635439135834137,
+        "vs_acc_p95": 0.2627623528727924,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    },
+    {
+      "batch": 2,
+      "k_true": 23.486586461421997,
+      "coverage": {
+        "vs_ref_p95": 0.2530740643335053,
+        "vs_acc_p95": 0.26055334791822626,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    },
+    {
+      "batch": 3,
+      "k_true": 22.096246284815454,
+      "coverage": {
+        "vs_ref_p95": 0.26813942707893723,
+        "vs_acc_p95": 0.2723170711697794,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    },
+    {
+      "batch": 4,
+      "k_true": 16.475484896417242,
+      "coverage": {
+        "vs_ref_p95": 0.2772192185697133,
+        "vs_acc_p95": 0.26239613668553974,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    },
+    {
+      "batch": 5,
+      "k_true": 27.187713997317548,
+      "coverage": {
+        "vs_ref_p95": 0.27275547838724973,
+        "vs_acc_p95": 0.28013766467665957,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    },
+    {
+      "batch": 6,
+      "k_true": 28.224673761809232,
+      "coverage": {
+        "vs_ref_p95": 0.26886352674772473,
+        "vs_acc_p95": 0.26056120502255053,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    },
+    {
+      "batch": 7,
+      "k_true": 34.506857810238095,
+      "coverage": {
+        "vs_ref_p95": 0.283402313027608,
+        "vs_acc_p95": 0.2737235181477635,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    },
+    {
+      "batch": 8,
+      "k_true": 16.157132436248936,
+      "coverage": {
+        "vs_ref_p95": 0.24565331825271733,
+        "vs_acc_p95": 0.24937464997488706,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    },
+    {
+      "batch": 9,
+      "k_true": 32.97397178409798,
+      "coverage": {
+        "vs_ref_p95": 0.2705866509229397,
+        "vs_acc_p95": 0.2554617471180158,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    },
+    {
+      "batch": 10,
+      "k_true": 15.095671002687872,
+      "coverage": {
+        "vs_ref_p95": 0.2570757462092771,
+        "vs_acc_p95": 0.2591064367965127,
+        "threshold": 0.3,
+        "pass": true
+      },
+      "status": "ok",
+      "time_s": 0.02
+    }
+  ],
+  "written_at_utc": "2026-08-01T02:47:16.598867+00:00"
+}

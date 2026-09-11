@@ -1,0 +1,46 @@
+# Smoke gate for heat_v3_qint (2 batches, 3 sizes).
+# Refresh mode converges poorly at tiny n_train, so the smoke gate keeps the
+# full lambda grid (some candidates converge at every size, mirroring the
+# heat_refresh full run's 26% invalid-candidate level).
+experiment:
+  seed: 2026
+  sample_sizes: [10, 60, 120]
+
+heat:
+  datasets_root: migration/datasets
+  batches: [1, 2]
+
+train_fraction: 0.7
+refit_on_train_validation: false
+
+lambda_grid:
+  physics: [0.01, 0.1, 1.0, 10.0]
+  l1: [0.001, 0.01, 0.1]
+  group: [0.001, 0.01, 0.1]
+
+model:
+  feature_spec: heat_v3_qint
+  refresh_weak_labels: true
+  theta_lower: [0.028571428571428572]
+  theta_upper: [0.06666666666666667]
+  mapping: identity
+  standardize: true
+  d_ridge: 10.0
+  selection_rule: physics_one_standard_error
+  n_jobs: 4
+  parallel_verbose: 5
+  parallel_temp_folder: reproduction/.joblib
+  admm_rho: 1.0
+  admm_adaptive_rho: true
+  admm_tolerance: 0.00001
+  admm_max_iter: 20000
+  bcd_tolerance: 0.0001
+  bcd_parameter_tolerance: 0.01
+  bcd_max_iter: 60
+  theta_starts: 1
+  require_convergence: true
+
+baselines: [Ridge, DT, GP, Physics, PhysicsDirect]
+
+protocol:
+  profile: heat_v3_qint_smoke

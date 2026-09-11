@@ -1,0 +1,47 @@
+# Heat-conduction migration pilot: smoke gate (2 batches, tiny grid).
+# Scenario design: migration/reports/COMSOL三维热传导场景迁移分析.md.
+experiment:
+  seed: 2026
+  sample_sizes: [10, 30, 60, 120]
+
+heat:
+  datasets_root: migration/datasets
+  batches: [1, 2]
+
+train_fraction: 0.7
+refit_on_train_validation: false
+
+lambda_grid:
+  physics: [0.1, 1.0]
+  l1: [0.01]
+  group: [0.01]
+
+model:
+  feature_spec: heat
+  # theta = 1/k box bounds [1/35, 1/15]; migration analysis §6.1.
+  theta_lower: [0.028571428571428572]
+  theta_upper: [0.06666666666666667]
+  mapping: identity
+  standardize: true
+  # [STABILITY] Same explicit stabilizer choice as the simulation protocol.
+  d_ridge: 10.0
+  selection_rule: physics_one_standard_error
+  n_jobs: 1
+  parallel_verbose: 5
+  parallel_temp_folder: reproduction/.joblib
+  admm_rho: 1.0
+  admm_adaptive_rho: true
+  admm_tolerance: 0.00001
+  # [ENGINEERING] The 1-D theta subproblem needs ~3k ADMM iterations while
+  # adaptive rho ramps from 1 to ~100 for this parameter scale.
+  admm_max_iter: 20000
+  bcd_tolerance: 0.0001
+  bcd_parameter_tolerance: 0.01
+  bcd_max_iter: 60
+  theta_starts: 1
+  require_convergence: true
+
+baselines: [Ridge, DT, GP, Physics, PhysicsDirect]
+
+protocol:
+  profile: heat_smoke

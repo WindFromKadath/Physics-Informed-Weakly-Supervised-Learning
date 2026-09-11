@@ -1,0 +1,50 @@
+# Heat W10: Case-B authentic weak-label refresh on the v2 (no_qq) baseline.
+# Weak labels are re-evaluated at the CURRENT theta every BCD sweep
+# (refresh_weak_labels), turning the heat scenario's weak term into the same
+# mechanism as the paper's Case B layer 3.  theta init comes from eq.(12)
+# calibration on the training split (no test leakage by construction).
+experiment:
+  seed: 2026
+  sample_sizes: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
+
+heat:
+  datasets_root: migration/datasets
+  batches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+train_fraction: 0.7
+refit_on_train_validation: false
+
+lambda_grid:
+  physics: [0.01, 0.1, 1.0, 10.0]
+  l1: [0.001, 0.01, 0.1]
+  group: [0.001, 0.01, 0.1]
+
+model:
+  feature_spec: heat_no_qq
+  # [ENGINEERING] W10: Case-B authentic mode; weak labels track theta.
+  refresh_weak_labels: true
+  theta_lower: [0.028571428571428572]
+  theta_upper: [0.06666666666666667]
+  mapping: identity
+  standardize: true
+  d_ridge: 10.0
+  selection_rule: physics_one_standard_error
+  n_jobs: 4
+  parallel_verbose: 5
+  parallel_temp_folder: reproduction/.joblib
+  admm_rho: 1.0
+  admm_adaptive_rho: true
+  admm_tolerance: 0.00001
+  # [ENGINEERING] The 1-D theta subproblem needs ~3k ADMM iterations while
+  # adaptive rho ramps from 1 to ~100 for this parameter scale.
+  admm_max_iter: 20000
+  bcd_tolerance: 0.0001
+  bcd_parameter_tolerance: 0.01
+  bcd_max_iter: 80
+  theta_starts: 1
+  require_convergence: true
+
+baselines: [Ridge, SVR, DT, RF, GBDT, GP, Physics, PhysicsDirect]
+
+protocol:
+  profile: heat_w10_refresh

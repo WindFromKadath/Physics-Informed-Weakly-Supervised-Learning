@@ -29,7 +29,7 @@ PAPER_REFERENCE: dict[str, Any] = {
     "iv_c_crossover_labels": 100,
 }
 
-DEFAULT_RESULTS = ROOT / "results" / "section_iv_single_full_parallel"
+DEFAULT_RESULTS = ROOT / "results" / "legacy" / "section_iv_single_full_parallel"
 
 
 def _mean_noise_sigma(conditions: pd.DataFrame) -> float:

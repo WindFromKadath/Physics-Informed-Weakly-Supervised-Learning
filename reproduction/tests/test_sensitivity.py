@@ -18,7 +18,9 @@ from compare_to_paper import PAPER_REFERENCE, compare_results
 from diagnose_basis import diagnose_basis
 
 SENSITIVITY_DIR = REPRODUCTION / "configs" / "sensitivity"
-BASELINE_RESULTS = REPRODUCTION / "results" / "section_iv_single_full_parallel"
+# 现行业务层基线（与 legacy/section_iv_single_full_parallel 数值逐位一致，
+# 默认测试不得依赖 legacy/）。
+BASELINE_RESULTS = REPRODUCTION / "results" / "paper_single"
 
 # 阶段 2：每个变体相对 base.yaml 的递归差异键集合（s12 三个键）。
 # s04/s12 额外包含 model.admm_max_iter=2000：[ENGINEERING] refit 合并数据后

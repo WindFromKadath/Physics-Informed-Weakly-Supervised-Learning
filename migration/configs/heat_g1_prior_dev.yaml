@@ -1,0 +1,73 @@
+# S2 pre-study (DEVELOPMENT scale): G1 "engineering-prior" PWL tier.
+# feature_spec = heat_g1_prior: no_qq engineering columns plus q_int (and its
+# modulated variant) times a coarse negative-power grid {0.3, 0.5, 1.0} that
+# deliberately excludes the oracle exponent 0.7.
+# Runs on batches 21-25 — already development data after S1 — so results are
+# DIRECTIONAL ONLY.  The formal S2 run requires fresh batches (41-60) and a
+# pre-registration frozen before their generation.
+# Model block identical to frozen A0 except feature_spec.
+experiment:
+  seed: 2026
+  sample_sizes:
+  - 10
+  - 20
+  - 30
+  - 40
+  - 50
+  - 60
+  - 70
+  - 80
+  - 90
+  - 100
+  - 110
+  - 120
+heat:
+  datasets_root: migration/datasets
+  batches:
+  - 21
+  - 22
+  - 23
+  - 24
+  - 25
+train_fraction: 0.7
+refit_on_train_validation: false
+lambda_grid:
+  physics:
+  - 0.01
+  - 0.1
+  - 1.0
+  - 10.0
+  l1:
+  - 0.001
+  - 0.01
+  - 0.1
+  group:
+  - 0.001
+  - 0.01
+  - 0.1
+model:
+  feature_spec: heat_g1_prior
+  refresh_weak_labels: true
+  theta_lower:
+  - 0.02857142857142857
+  theta_upper:
+  - 0.06666666666666667
+  mapping: identity
+  standardize: true
+  d_ridge: 10.0
+  selection_rule: minimum
+  n_jobs: 4
+  parallel_verbose: 5
+  parallel_temp_folder: reproduction/.joblib
+  admm_rho: 1.0
+  admm_adaptive_rho: true
+  admm_tolerance: 1.0e-05
+  admm_max_iter: 20000
+  bcd_tolerance: 0.0001
+  bcd_parameter_tolerance: 0.01
+  bcd_max_iter: 80
+  theta_starts: 1
+  require_convergence: true
+baselines: []
+protocol:
+  profile: heat_g1_prior_dev

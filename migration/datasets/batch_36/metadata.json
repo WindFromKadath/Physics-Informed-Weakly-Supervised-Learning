@@ -1,0 +1,78 @@
+{
+  "spec_version": "v1.3 (1D)",
+  "batch_index": 36,
+  "solver": "1D: 高保真 Kirchhoff BVP + 低保真闭式解 (in-repo verify_attribution.hf_solve; 与 comsol_platform/solver1d.py 同源)，无离散误差",
+  "output_definition": "y = 界面两侧平均温度 (T1+T2)/2 = T1(L/2) − dT_int/2",
+  "k_true": 19.201223477871352,
+  "sigma": 4.493844638867134,
+  "sigma_definition": "试验综合重复性误差（SNR=5）",
+  "sigma_low_option": 0.5,
+  "R0": 0.03,
+  "beta_k": 0.002,
+  "k_nominal": 25.0,
+  "comsol_version": "N/A（一维求解器，未使用 COMSOL）",
+  "seeds": {
+    "k_true": 20264331,
+    "reference": 20264332,
+    "acceptance": 20264333,
+    "engineering": 20264334,
+    "calibration": 20264335,
+    "noise_ref": 20264336,
+    "noise_acc": 20264337,
+    "noise_cal": 20264338
+  },
+  "sizes": {
+    "reference": 120,
+    "acceptance": 200,
+    "engineering": 200
+  },
+  "success_rate": {
+    "reference": 1.0,
+    "acceptance": 1.0,
+    "engineering": 1.0
+  },
+  "failures": {
+    "reference": [],
+    "acceptance": [],
+    "engineering": []
+  },
+  "nested_reference": "前 k 行即嵌套子集，k ∈ {10,20,...,120}（固定顺序，种子唯一确定）",
+  "coverage": {
+    "direction": "参考/验收 → 工程",
+    "reference_to_engineering": {
+      "mean": 0.17319324021924273,
+      "p95": 0.26108199965105455,
+      "mean_pct_of_diag": 0.08659662010962137,
+      "p95_pct_of_diag": 0.13054099982552728,
+      "frac_within_10pct": 0.6916666666666667,
+      "frac_within_15pct": 1.0
+    },
+    "acceptance_to_engineering": {
+      "mean": 0.17659783124969344,
+      "p95": 0.26797937862757953,
+      "mean_pct_of_diag": 0.08829891562484672,
+      "p95_pct_of_diag": 0.13398968931378977,
+      "frac_within_10pct": 0.685,
+      "frac_within_15pct": 0.99
+    },
+    "threshold_p95": 0.3,
+    "pass": true
+  },
+  "derived_columns": "reference/acceptance 含 dT_int（界面温跃，P 通道诊断）",
+  "sha256": {
+    "reference_measurements.csv": "dbe54c226d04b82d14129d2b49475f7e5d42ca84c1a25217da3c91e785257e86",
+    "acceptance_tests.csv": "63d1c8f044f4c8c8152412413f072dcb5d9dd59a40ff67e5990bed20881031b6",
+    "engineering_predictions.csv": "c0ccf2cc53bbf4af4ace29d9eb421eb870e884bca75e51b2ee99fbeb9d93b5e9"
+  },
+  "units": "Q[W/m^3], h[W/(m^2*K)], T_inf[K], P[MPa], y[K]; dT_int[K]",
+  "solver_diagnostics": {
+    "reference_max_abs_f1_K": 1.2789769243681803e-13,
+    "reference_max_abs_f2_Wm2": 4.547473508864641e-12,
+    "reference_newton_iterations": 5,
+    "acceptance_max_abs_f1_K": 1.7408297026122455e-13,
+    "acceptance_max_abs_f2_Wm2": 4.519051799434237e-12,
+    "acceptance_newton_iterations": 5
+  },
+  "provenance": "blind-test S1 extension: in-repo generator migration/generate_blind_batches.py; batches 1-20 untouched",
+  "written_at_utc": "2026-08-05T13:40:32.738246+00:00"
+}

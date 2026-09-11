@@ -1,0 +1,50 @@
+# Case B (spot weld) full protocol: 2 scenarios x 5 random splits.
+# Plan: reproduction/reports/案例B复现/案例B迁移实施计划.md.
+experiment:
+  seed: 2026
+  label_scenarios: [10, 100]
+  n_splits: 5
+
+case_b:
+  data_root: datasets/case_b_spotweld
+  n_weak: 120
+  weak_seed: 9102026
+
+train_fraction: 0.7
+refit_on_train_validation: false
+
+lambda_grid:
+  physics: [0.01, 0.1, 1.0, 10.0]
+  l1: [0.001, 0.01, 0.1]
+  group: [0.001, 0.01, 0.1]
+
+model:
+  feature_spec: case_b
+  # theta = tuning (contact resistance); SAVE prior box (09 doc §4.5).
+  theta_lower: [0.8]
+  theta_upper: [8.0]
+  # [PAPER-adjacent] Case-B layer 3: weak labels track the current theta.
+  refresh_weak_labels: true
+  mapping: identity
+  standardize: true
+  d_ridge: 10.0
+  selection_rule: physics_one_standard_error
+  n_jobs: 4
+  parallel_verbose: 5
+  parallel_temp_folder: reproduction/.joblib
+  admm_rho: 1.0
+  admm_adaptive_rho: true
+  admm_tolerance: 0.00001
+  admm_max_iter: 20000
+  bcd_tolerance: 0.0001
+  bcd_parameter_tolerance: 0.01
+  bcd_max_iter: 80
+  # [STABILITY] Multi-start theta (audit report P2): theta estimates were
+  # observed swinging across [1.8, 7.5] with single-start calibration.
+  theta_starts: 3
+  require_convergence: true
+
+baselines: [Ridge, SVR, DT, RF, GBDT, GP, Physics]
+
+protocol:
+  profile: case_b_default

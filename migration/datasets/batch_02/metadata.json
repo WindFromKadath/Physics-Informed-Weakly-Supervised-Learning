@@ -1,0 +1,69 @@
+{
+  "spec_version": "v1.3 (1D)",
+  "batch_index": 2,
+  "solver": "1D: 高保真 Kirchhoff BVP + 低保真闭式解 (comsol_platform/solver1d.py)，无离散误差",
+  "output_definition": "y = 界面两侧平均温度 (T1+T2)/2 = T1(L/2) − dT_int/2",
+  "k_true": 23.486586461421997,
+  "sigma": 4.493844638867134,
+  "sigma_definition": "试验综合重复性误差（SNR=5）",
+  "sigma_low_option": 0.5,
+  "R0": 0.03,
+  "beta_k": 0.002,
+  "k_nominal": 25.0,
+  "comsol_version": "N/A（一维求解器，未使用 COMSOL）",
+  "seeds": {
+    "k_true": 20260931,
+    "reference": 20260932,
+    "acceptance": 20260933,
+    "engineering": 20260934,
+    "calibration": 20260935,
+    "noise_ref": 20260936,
+    "noise_acc": 20260937,
+    "noise_cal": 20260938
+  },
+  "sizes": {
+    "reference": 120,
+    "acceptance": 200,
+    "engineering": 200
+  },
+  "success_rate": {
+    "reference": 1.0,
+    "acceptance": 1.0,
+    "engineering": 1.0
+  },
+  "failures": {
+    "reference": [],
+    "acceptance": [],
+    "engineering": []
+  },
+  "nested_reference": "前 k 行即嵌套子集，k ∈ {10,20,...,120}（固定顺序，种子唯一确定）",
+  "coverage": {
+    "direction": "参考/验收 → 工程",
+    "reference_to_engineering": {
+      "mean": 0.1693719042240911,
+      "p95": 0.2530740643335053,
+      "mean_pct_of_diag": 0.08468595211204555,
+      "p95_pct_of_diag": 0.12653703216675266,
+      "frac_within_10pct": 0.725,
+      "frac_within_15pct": 0.9916666666666667
+    },
+    "acceptance_to_engineering": {
+      "mean": 0.17573049946725827,
+      "p95": 0.26055334791822626,
+      "mean_pct_of_diag": 0.08786524973362914,
+      "p95_pct_of_diag": 0.13027667395911313,
+      "frac_within_10pct": 0.665,
+      "frac_within_15pct": 0.99
+    },
+    "threshold_p95": 0.3,
+    "pass": true
+  },
+  "derived_columns": "reference/acceptance 含 dT_int（界面温跃，P 通道诊断）",
+  "sha256": {
+    "reference_measurements.csv": "0b95374a2fe5aa4800016a262c3805678a91726abf103990c9bba3816c236e86",
+    "acceptance_tests.csv": "e7d21148b955e10126ac1c39fbbfafb497d1480fdb9c8a42272af3eb03a911d4",
+    "engineering_predictions.csv": "4fd66067abfcc002bf270f0ca06a3195f8b6f40574d7d6d5e3d3d59d78ae593c"
+  },
+  "units": "Q[W/m^3], h[W/(m^2*K)], T_inf[K], P[MPa], y[K]; dT_int[K]",
+  "written_at_utc": "2026-08-01T02:47:16.434799+00:00"
+}

@@ -24,11 +24,12 @@ dev = ["pytest>=8.0"]
 
 [project.scripts]
 pwl-repro = "pwl_repro.cli:main"
+pwl-migration = "pwl_migration.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["reproduction/src/pwl_repro"]
+packages = ["reproduction/src/pwl_repro", "migration/src/pwl_migration"]
 
 [tool.pytest.ini_options]
 addopts = "-q"
-pythonpath = ["reproduction/src"]
-testpaths = ["reproduction/tests"]
+pythonpath = ["reproduction/src", "migration/src"]
+testpaths = ["reproduction/tests", "migration/tests"]

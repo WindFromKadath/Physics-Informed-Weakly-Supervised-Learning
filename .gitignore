@@ -2,17 +2,42 @@
 .pytest_cache/
 __pycache__/
 *.py[cod]
+
+# Generated experiment artifacts and process logs
+runs/
+.joblib/
+*.log
+*.err
+
+# results 目录整体可再生成，不纳入版本控制；
+# 唯一例外：v3 基线卡（M1 交付物，人工整理、需长期追溯）
 results/
+!migration/results/
+migration/results/*
+!migration/results/heat_v3_qint_min/
+migration/results/heat_v3_qint_min/*
+!migration/results/heat_v3_qint_min/BASELINE.md
+
+# Local scratch space
+tmp/
+
+# Local editor and operating-system state
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python build products
 dist/
 build/
 *.egg-info/
 
+# Presentation diagnostics and verified duplicate local exports
+*.inspect.ndjson
+/docs/PWL项目全景介绍_完整组会版.pptx
+/docs/PWL项目全景介绍_完整组会版_逐页讲解稿.docx
+
 # Keep personal settings, logs and local secrets out of version control
-.vscode/
-runs/
-*.log
-*.err
-tmp/
 .env
 .env.*
 !.env.example
