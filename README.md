@@ -4,6 +4,60 @@
 
 **当前整理分支：`HeatTest`。** 本项目是论文数学结构与优化方法的工程复现，不是原作者官方实现，也未严格复现论文全部数值。
 
+## 相关论文
+
+**Dhari F. Alenezi, Michael Biehler, Jianjun Shi, and Jing Li.**  
+*Physics-Informed Weakly-Supervised Learning for Quality Prediction of Manufacturing Processes.*  
+**IEEE Transactions on Automation Science and Engineering**, vol. 22, pp. 2006–2019, 2025.  
+DOI：[10.1109/TASE.2024.3374098](https://doi.org/10.1109/TASE.2024.3374098) · [作者团队提供的论文 PDF](https://sites.gatech.edu/jianjun-shi/files/2025/02/Physics-Informed_Weakly-Supervised_Learning_for_Quality_Prediction_of_Manufacturing_Processes.pdf) · [作者发表列表](https://sites.gatech.edu/jianjun-shi/publications/)
+
+论文于 2024 年 3 月在线发表，收录于 2025 年第 22 卷，因此 DOI 中的年份与卷年不同。本文引用使用正式卷年 2025。
+
+### 研究问题与核心方法
+
+制造过程的最终质量标签通常需要昂贵甚至破坏性的检测，真实标记数据较少；物理模型能提供低成本预测，但会受到参数不确定性与模型偏差影响。论文提出 PWL，将物理模型输出作为弱标签，与少量真实标签共同训练质量预测模型。
+
+本项目沿用的预测结构为：
+
+$$
+\hat y = H(x^{\mathrm{ph}},\theta)g + B(x^{\mathrm{pr}},x^{\mathrm{ph}})d.
+$$
+
+- `H g`：利用物理相关变量与校准参数构造特征，从物理弱标签中学习预测关系。
+- `B d`：利用过程变量等信息补偿物理模型不能充分解释的差异。
+- `theta`：参与联合学习的物理模型校准参数，其可识别性需要单独验证。
+- 训练结合真实标签拟合、物理弱监督拟合、L1 与组稀疏正则；通过块坐标下降（BCD）交替更新参数，并使用 ADMM 求解相应子问题。
+
+方法细节见原论文；本项目的实际目标函数、稳定项和工程假设见 [复现技术说明](reproduction/REPRODUCTION.md#数学实现对应)。
+
+### 原论文与本仓库的对应关系
+
+| 内容 | 论文关注的问题 | 本仓库对应位置 |
+|---|---|---|
+| PWL 建模与优化 | 物理弱标签、差异补偿和参数联合估计 | `reproduction/src/pwl_repro/core/` |
+| Section IV-A | 标记样本数变化时的预测性能 | `--mode sample-size` |
+| Section IV-B | 物理模型精度变化对学习效果的影响 | `--mode physics-accuracy` |
+| Section IV-C | 物理弱监督能否减少真实标签需求 | `--mode label-savings` |
+| 一维稳态热传导测试 | 本项目对 PWL 的独立迁移与适用性检验 | `migration/`；不是原论文实验 |
+
+论文仿真的数据生成采用式 (9)–(11)，具体划分、相关性目标和运行配置见 [Section IV 复现协议](reproduction/SECTION_IV_PROTOCOL.md)。原论文未公开的基函数、输入协方差与数值处理等细节，由本项目显式补全；论文报告的优势不能直接视为本仓库已经取得的结果。原论文其他实验案例不属于本项目保留范围。
+
+### 论文引用
+
+引用原方法时可使用以下 BibTeX；引用本仓库的复现或热传导结果时，还应注明实际使用的提交号、配置和报告。
+
+```bibtex
+@article{alenezi2025pwl,
+  author  = {Alenezi, Dhari F. and Biehler, Michael and Shi, Jianjun and Li, Jing},
+  title   = {Physics-Informed Weakly-Supervised Learning for Quality Prediction of Manufacturing Processes},
+  journal = {IEEE Transactions on Automation Science and Engineering},
+  year    = {2025},
+  volume  = {22},
+  pages   = {2006--2019},
+  doi     = {10.1109/TASE.2024.3374098}
+}
+```
+
 ## 两条实验线
 
 | 部分 | 内容 | 入口 |
