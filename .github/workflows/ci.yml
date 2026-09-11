@@ -2,7 +2,7 @@ name: ci-smoke
 
 on:
   push:
-    branches: [main, master, 'codex/**']
+    branches: [main, master, HeatTest, 'codex/**']
   pull_request:
 
 jobs:
