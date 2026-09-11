@@ -10,10 +10,6 @@
 *.json text eol=lf
 *.csv text eol=lf
 
-# Third-party archival source is preserved byte-for-byte; do not apply the
-# repository's whitespace policy to the vendored SAVE package snapshot.
-datasets/case_b_spotweld/legacy/_raw/SAVE/** -whitespace
-
 *.gz binary
 *.pdf binary
 *.png binary

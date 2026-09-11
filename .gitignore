@@ -32,10 +32,22 @@ dist/
 build/
 *.egg-info/
 
-# Presentation diagnostics and verified duplicate local exports
+# Excluded application frameworks and presentation exports
+/assets/
+/datasets/
+/docs/PWL*/
+*.pptx
+*.docx
 *.inspect.ndjson
-/docs/PWL项目全景介绍_完整组会版.pptx
-/docs/PWL项目全景介绍_完整组会版_逐页讲解稿.docx
+/migration/reports/加热配方代理模型/
+/migration/reports/基础代理模型/
+/reproduction/configs/case_b_*.yaml
+/reproduction/src/pwl_repro/case_b*.py
+/reproduction/src/pwl_repro/scenarios/case_b.py
+/reproduction/tests/test_case_b.py
+/reproduction/reports/案例B*/
+/reproduction/reports/案例B*.md
+/references/docs/09_案例B*.md
 
 # Keep personal settings, logs and local secrets out of version control
 .env

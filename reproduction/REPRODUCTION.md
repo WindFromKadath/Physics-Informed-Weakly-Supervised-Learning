@@ -1,6 +1,6 @@
 # PWL 论文复现框架（结构性复现）
 
-> 本页保留数学实现、工程假设与复现边界。安装、仿真/案例 B 运行命令及公开仓库导航请先读 [README](README.md)。热传导最新证据见 [迁移说明](../migration/README.md)。
+> 本页保留数学实现、工程假设与复现边界。安装、仿真运行命令及公开仓库导航请先读 [README](README.md)。热传导最新证据见 [迁移说明](../migration/README.md)。
 
 本工程实现 Alenezi 等人在 *Physics-Informed Weakly-Supervised Learning for
 Quality Prediction of Manufacturing Processes* 中提出的 PWL 框架，并将论文未公开
@@ -56,22 +56,9 @@ uv run python reproduction/run_reproduction.py `
 三个实验的数据共享、统计检验和论文图表协议详见
 [`SECTION_IV_PROTOCOL.md`](SECTION_IV_PROTOCOL.md)。
 
-## 热传导迁移场景（已迁至 migration/）
+## 仿真规模与输出
 
-热传导迁移实验（COMSOL 试点）已分离到独立的
-[`migration/`](../migration/README.md) 目录树（包 `pwl_migration`），
-本目录仅保留论文复现内容。迁移实验入口：
-
-```powershell
-uv run python migration/run_migration.py `
-  --config migration/configs/heat_default.yaml `
-  --output migration/results/heat_default
-
-# 迁移线当前主配置（v3_qint_min，均值通过锚点 6）
-uv run python migration/run_migration.py `
-  --config migration/configs/heat_v3_qint_min.yaml `
-  --output migration/results/heat_v3_qint_min_recheck
-```
+热传导测试使用独立入口，见 [migration/README.md](../migration/README.md)。
 
 `reproduction/configs/paper_protocol.yaml` 使用论文的 12 个样本量、20 次重复和
 `10^-3` 至 `10^3` 的完整三维网格，计算量非常大。先用 `smoke.yaml` 验证环境，
@@ -83,42 +70,21 @@ uv run python migration/run_migration.py `
 ## 工程结构
 
 ```text
-PWL_Paper/
-├── .venv/                      # 根项目唯一 uv 环境
-├── pyproject.toml
-├── uv.lock
-├── reproduction/               # 论文复现（本目录）
-│   ├── configs/
-│   │   ├── smoke.yaml
-│   │   ├── default.yaml
-│   │   ├── diagnostic.yaml
-│   │   ├── paper_protocol.yaml
-│   │   └── case_b_*.yaml       # 案例 B（点焊熔核直径）
-│   ├── src/pwl_repro/
-│   │   ├── core/
-│   │   │   ├── features.py     # FeatureSpec、通用 H/B 变换与注册表
-│   │   │   ├── optimization.py # 通用一致性 ADMM
-│   │   │   └── model.py        # PWL BCD 估计器（任意 theta/输入维度）
-│   │   ├── scenarios/
-│   │   │   ├── simulation.py   # 式 (9)–(11) 数据生成
-│   │   │   ├── simulation_features.py
-│   │   │   └── case_b.py       # 克里金代理、H/B 库、数据契约
-│   │   ├── baselines.py        # 论文对比模型
-│   │   ├── experiments/
-│   │   │   ├── types.py        # 场景契约、指标、嵌套划分
-│   │   │   ├── tuning.py       # 候选评估与超参数选择
-│   │   │   ├── protocols.py    # IV-A/B/C 协议调度
-│   │   │   ├── statistics.py   # 配对检验与 Holm 校正
-│   │   │   └── reporting.py    # 图表、质量检查和制品
-│   │   ├── experiment_api.py   # 跨场景稳定公共实验接口
-│   │   ├── case_b_experiments.py
-│   │   └── cli.py
-│   ├── tests/
-│   └── run_reproduction.py
-├── migration/                  # 迁移实验（COMSOL 热传导，包 pwl_migration）
-├── datasets/case_b_spotweld/   # 案例 B 官方数据（SAVE 1.0）
-└── references/                 # PDF、解析 Markdown 与文献工具
+reproduction/
+├── configs/                 # 仿真与敏感性配置
+├── src/pwl_repro/
+│   ├── core/                # 特征、模型、BCD–ADMM
+│   ├── scenarios/           # Section IV 仿真数据与特征库
+│   ├── experiments/         # 调参、协议、统计与报告
+│   ├── experiment_api.py    # 热传导测试复用的接口
+│   ├── baselines.py         # 仿真对照模型
+│   └── cli.py
+├── tests/
+├── scripts/
+└── run_reproduction.py
 ```
+
+两个业务包共用根级环境，热传导代码位于 `migration/`。
 
 ## 数学实现对应
 
@@ -172,24 +138,9 @@ H(x, theta) g = c(x, g) + G(x, g) theta
 集中放在 `simulation._stability_masks` 和 `simulation._sample_inputs` 中，并在
 `conditions.csv` 保存接受率和输出分位数，便于敏感性分析。
 
-## 真实案例边界
+## 复现范围
 
-案例 B（点焊熔核直径）数据已获取（SAVE 1.0 官方，`../datasets/case_b_spotweld/`），
-复现协议已全链路实现并完成三轮迭代实验；**论文 Table V 的 PWL 优势未复现**，
-根因已分层归因——详见 `reports/案例B复现/案例B复现报告.md`（结果归档于
-`results/legacy/case_b_*`，该线当前暂停展开）。案例 A 的 35 组实验数据与
-原作者实际基函数仍未公开，论文 Table III–VI 不能诚实地逐点重建。核心估计器
-`PWLRegressor.fit(...)` 已把数据和物理模型作为公开接口；拿到数据后只需提供：
-
-```python
-model.fit(
-    x_ph, x_pr, y,
-    weak_x_ph, weak_y,
-    physics_model=my_physics_model,
-)
-```
-
-其中 `my_physics_model(x_ph, theta)` 返回给定校准参数下的物理模型输出。
+本目录只包含论文 Section IV 仿真，不提供论文其他实验案例的实现。核心估计器由论文仿真与热传导测试共同使用，公共接口不代表其他场景已经完成。
 
 ## 验证标准
 

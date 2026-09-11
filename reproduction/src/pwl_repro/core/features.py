@@ -92,11 +92,6 @@ def get_feature_spec(name: str, b_profile: str = "expanded") -> FeatureSpec:
                 f"Unknown heat feature_spec {name!r}. "
                 f"Registered: {sorted(_SPEC_FACTORIES)}."
             )
-        if name == "case_b" or name.startswith("case_b_"):
-            raise ValueError(
-                f"Unknown case_b feature_spec {name!r}. "
-                f"Registered: {sorted(_SPEC_FACTORIES)}."
-            )
         raise ValueError(
             f"Unknown feature_spec {name!r}. "
             f"Registered: {sorted(_SPEC_FACTORIES)}. "
@@ -164,7 +159,7 @@ class PWLFeatureLibrary:
                 # n_train labeled rows alone annihilates B whenever
                 # n_train <= rank(H): the underdetermined lstsq interpolates
                 # every B column exactly and the drop rule below then
-                # discards all of B (audit report 案例B实现审查报告 Bug 1).
+                # discards all of B when the projection spans the sample space.
                 h_ref = h_raw
                 b_ref = self._b_raw(h_x_ph, np.empty((len(h_x_ph), 0)))
             else:

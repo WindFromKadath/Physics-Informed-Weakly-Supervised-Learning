@@ -1,4 +1,4 @@
-# 论文复现：PWL 核心、仿真与点焊案例 B
+# 论文复现：PWL 核心与 Section IV 仿真
 
 本目录实现论文 *Physics-Informed Weakly-Supervised Learning for Quality Prediction of Manufacturing Processes* 的 PWL 数学结构与 BCD–ADMM 优化方法，提供可运行、可审计的研究基线。它是独立实现，**不代表原作者官方代码，也不声称严格复现全部表格数值**。
 
@@ -9,9 +9,9 @@
 | 模块 | 内容 |
 |---|---|
 | `src/pwl_repro/core/` | FeatureSpec、PWLRegressor、BCD–ADMM、稀疏近端算子 |
-| `src/pwl_repro/scenarios/` | 论文式 (9)–(11) 仿真、点焊数据适配与代理模型 |
+| `src/pwl_repro/scenarios/` | 论文式 (9)–(11) 仿真数据与特征库 |
 | `src/pwl_repro/experiments/` | 调参、嵌套划分、实验协议、统计与结果输出 |
-| `configs/` | smoke、日常规模、论文规模和案例 B 配置 |
+| `configs/` | smoke、日常规模、论文规模和敏感性配置 |
 | `tests/`、`scripts/` | 回归测试与独立数值验证 |
 | `reports/` | 复现审计、差异解释；`legacy/` 保存历史分析 |
 
@@ -26,7 +26,7 @@ uv sync --locked --python 3.11 --extra dev
 uv run python reproduction/run_reproduction.py --help
 ```
 
-需要预先安装 uv；项目 Python 范围为 ≥3.11、<3.14，本次验证使用 3.11。点焊运行直接使用仓内 CSV 和 Python 代理，无需安装 ANSYS 或 R；重新提取原始 R 数据不属于最小运行流程。
+需要预先安装 uv；项目 Python 范围为 ≥3.11、<3.14，本次验证使用 3.11。仿真数据由仓内代码生成，无需外部实验数据或商业仿真软件。
 
 ## 最小运行
 
@@ -34,12 +34,6 @@ uv run python reproduction/run_reproduction.py --help
 
 ```sh
 uv run python reproduction/run_reproduction.py --config reproduction/configs/smoke.yaml --mode sample-size --output reproduction/results/quickstart
-```
-
-点焊案例 B 使用独立场景参数：
-
-```sh
-uv run python reproduction/run_reproduction.py --scenario case_b --config reproduction/configs/case_b_smoke.yaml --mode sample-size --output reproduction/results/case_b_quickstart
 ```
 
 输出目录由程序创建。重复使用相同目录可能覆盖产物，建议为每次正式运行指定新目录。smoke 验证的是程序流程，不是论文数值一致性。
@@ -52,9 +46,8 @@ uv run python reproduction/run_reproduction.py --scenario case_b --config reprod
 | 日常仿真 | `configs/default.yaml` |
 | 趋势诊断 | `configs/diagnostic.yaml` |
 | 论文规模 | `configs/paper_protocol.yaml`；完整网格计算量显著增大 |
-| 案例 B | `configs/case_b_default.yaml`，必须加 `--scenario case_b` |
 
-仿真 `--mode` 支持 `sample-size`、`physics-accuracy`、`label-savings` 和 `all`；案例 B 仅支持 `sample-size`。默认模式为 `sample-size`，不会自动运行全部协议。
+仿真 `--mode` 支持 `sample-size`、`physics-accuracy`、`label-savings` 和 `all`。默认模式为 `sample-size`，不会自动运行全部协议。
 
 ```sh
 uv run python reproduction/run_reproduction.py --config reproduction/configs/default.yaml --mode all --output reproduction/results/default_recheck
@@ -65,8 +58,7 @@ uv run python reproduction/run_reproduction.py --config reproduction/configs/def
 ## 数据来源与复现边界
 
 - **仿真数据**：由仓内生成器按配置和种子生成。H/B、输入协方差、奇点拒绝采样和噪声口径包含工程假设，详见 [技术说明](REPRODUCTION.md#论文缺失信息与本复现的明确假设)。
-- **案例 B**：使用 SAVE 1.0 的 120 条过程样本和 35 条模型样本。来源、字段及原始材料见 [数据说明](../datasets/case_b_spotweld/README.md)。
-- **已见限制**：案例 B 的协议已实现，但论文 Table V 的 PWL 优势未复现，见 [案例 B 报告](reports/案例B复现/案例B复现报告.md)。案例 A 未在本仓库提供完整可运行复现。
+- **范围限制**：本目录只提供 Section IV 数值仿真；原论文其他实验案例不作为本项目实现或成果。
 - **参数解释**：校准参数是否具有物理可识别性取决于具体场景，不能仅凭预测精度证明参数恢复正确。
 
 ## 输出与验证
@@ -78,7 +70,7 @@ uv run pytest reproduction/tests
 uv run python reproduction/scripts/verify_sim_correctness.py
 ```
 
-2026-09-11 的全项目验证为 70 项测试和 30 项独立仿真检查通过；这是当时的检查记录，不表示所有实验质量指标或论文结论均通过。详见 [整理记录](../docs/CONSOLIDATION.md)。
+当前保留范围的验证记录见 [当前状态](../docs/CURRENT_STATUS.md)。测试通过不表示论文数值完全一致或所有科学质量锚点成立。
 
 ## 排查与贡献
 
