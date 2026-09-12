@@ -104,3 +104,9 @@ uv run python migration/run_migration.py --config migration/configs/heat_smoke.y
 - [参考材料与论文解析](references/README.md)
 
 复用研究结果时，请区分原论文、第三方数据来源与本仓库的工程假设，并记录分支/提交号、配置、批次和随机种子。报告问题可提交 [Issue](https://github.com/WindFromKadath/Physics-Informed-Weakly-Supervised-Learning/issues)，附上命令、Python 版本、配置及最小错误信息。修改模型或实验协议时，请同步相关测试和报告中的结论边界。
+
+## 许可证
+
+本项目原创代码及原创配套文档采用 [MIT License](LICENSE)，Copyright (c) 2026 WindFromKadath。
+
+此许可不覆盖第三方论文、论文提取文本、引用的图表和其他第三方材料，包括 `references/papers/`、`references/extracted_text/` 及 `references/tools/eq_dump.txt` 中的论文内容；这些材料的权利归原作者或出版方所有，使用时须遵循其原有授权。数据集不纳入本次 MIT 授权，来源与生成方式见 [数据集说明](migration/datasets/README.md)。第三方依赖仍适用各自许可证。本仓库的 MIT 授权不代表原论文作者对本实现的认可或授权背书。
