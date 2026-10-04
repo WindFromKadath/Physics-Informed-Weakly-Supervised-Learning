@@ -1,5 +1,7 @@
 # PWL：论文复现与热传导迁移
 
+中文 | [English](README.en.md)
+
 本仓库提供 Physics-Informed Weakly-Supervised Learning（PWL）的独立研究实现：将物理弱标签、少量标记数据和过程差异补偿结合，用于质量预测。本仓库仅包含论文 Section IV 仿真复现与实际使用的一维稳态热传导测试。
 
 **当前整理分支：`HeatTest`。** 本项目是论文数学结构与优化方法的工程复现，不是原作者官方实现，也未严格复现论文全部数值。
