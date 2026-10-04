@@ -1,34 +1,36 @@
-# 项目架构
+# Project Architecture
 
-仓库只有两部分：论文 Section IV 仿真复现和一维稳态热传导测试。二者共享一个根级 uv 环境和 PWL 核心，不以通用接口的存在宣称其他应用已实现。
+[中文](ARCHITECTURE.zh-CN.md) | English
 
-## 依赖方向
+The repository has only two parts: the paper's Section IV simulation reproduction and the one-dimensional steady-state heat-conduction tests. They share one root-level uv environment and the PWL core; the existence of generic interfaces is not a claim that other applications are implemented.
+
+## Dependency direction
 
 ```text
-pwl_repro.core                  特征库、PWLRegressor、BCD–ADMM
+pwl_repro.core                  Feature libraries, PWLRegressor, BCD–ADMM
         ▲
-        ├── pwl_repro.scenarios 仿真数据与仿真特征
-        ├── pwl_repro.experiments 调参、协议、统计与报告
-        └── pwl_migration      热传导测试
+        ├── pwl_repro.scenarios Simulation data and simulation features
+        ├── pwl_repro.experiments Tuning, protocols, statistics, and reports
+        └── pwl_migration      Heat-conduction tests
                     └── pwl_repro.experiment_api
 ```
 
-核心不导入具体场景。仿真特征在包初始化时注册；热传导特征在迁移入口导入场景模块时注册。跨包实验复用通过 `experiment_api`。旧的 `model`、`features`、`optimization`、`simulation` 路径保留为兼容别名。
+The core does not import specific scenarios. Simulation features are registered at package initialization; heat-conduction features are registered when the migration entry imports the scenario module. Cross-package experiment reuse goes through `experiment_api`. The old `model`, `features`, `optimization`, and `simulation` paths remain as compatibility aliases.
 
-## 目录职责
+## Directory responsibilities
 
-| 目录 | 内容 |
+| Directory | Content |
 |---|---|
-| `reproduction/` | Section IV 仿真、敏感性配置、测试与复现说明 |
-| `migration/` | 一维热传导物理、40 批数据、配置、验收、分析和报告 |
-| `docs/` | 两部分的当前状态与架构 |
-| `references/` | 论文复现的文献依据与提取工具 |
+| `reproduction/` | Section IV simulations, sensitivity configurations, tests, and reproduction notes |
+| `migration/` | 1D heat-conduction physics, 40 batches of data, configurations, acceptance, analysis, and reports |
+| `docs/` | Current status and architecture of the two parts |
+| `references/` | Literature basis and extraction tools for the paper reproduction |
 
-`results/`、`runs/`、缓存和临时目录不进入 Git，人工冻结的 v3 基线卡除外。`legacy/` 中保留的材料仅用于这两部分的历史追溯，不作为当前实现入口。
+`results/`, `runs/`, caches, and temporary directories do not enter Git, except the manually frozen v3 baseline card. Material kept under `legacy/` serves only historical traceability of these two parts and is not a current implementation entry.
 
-## 运行与检查
+## Running and checking
 
-全部命令从仓库根目录运行：
+All commands run from the repository root:
 
 ```sh
 uv sync --locked --python 3.11 --extra dev
@@ -36,4 +38,4 @@ uv run pytest
 uv run python reproduction/scripts/verify_sim_correctness.py
 ```
 
-实验命令分别见 [论文复现](../reproduction/README.md) 和 [热传导测试](../migration/README.md)。
+For experiment commands, see [paper reproduction](../reproduction/README.md) and [heat-conduction tests](../migration/README.md) respectively.

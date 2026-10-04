@@ -1,43 +1,45 @@
-# 当前状态：论文仿真复现与热传导测试
+# Current Status: Paper-Simulation Reproduction and Heat-Conduction Tests
 
-本仓库仅保留两部分：论文 Section IV 仿真复现，以及实际使用的一维稳态热传导测试。其他应用的代码框架、配置、数据和方案不作为本项目已实现内容，也不纳入当前版本。
+[中文](CURRENT_STATUS.zh-CN.md) | English
 
-## 论文仿真复现
+This repository keeps only two parts: the reproduction of the paper's Section IV simulations, and the one-dimensional steady-state heat-conduction tests actually in use. Code frameworks, configurations, data, and plans for other applications are not implemented content of this project and are not included in the current version.
 
-- PWL 特征库、BCD–ADMM、近端算子与模型拟合。
-- 样本量、物理精度和标签节省三个协议，以及相关敏感性分析。
-- 复现是结构性的，H/B、协方差、噪声和奇点处理包含显式工程假设。
+## Paper-simulation reproduction
 
-入口：[论文复现 README](../reproduction/README.md)、[技术说明](../reproduction/REPRODUCTION.md)、[Section IV 协议](../reproduction/SECTION_IV_PROTOCOL.md)。
+- PWL feature libraries, BCD–ADMM, proximal operators, and model fitting.
+- Three protocols — sample size, physics accuracy, and label savings — plus related sensitivity analyses.
+- The reproduction is structural; H/B, covariance, noise, and singular-point handling contain explicit engineering assumptions.
 
-## 热传导测试
+Entries: [reproduction README](../reproduction/README.md), [technical notes](../reproduction/REPRODUCTION.md), [Section IV protocol](../reproduction/SECTION_IV_PROTOCOL.md).
 
-保留批 1–40 数据、v3 基线、消融、输出对齐、S1 与 G0/G1 开发测试，以及对应配置和验收/分析脚本。它们属于同一热传导测试线。
+## Heat-conduction tests
 
-- S1 @120 RMSE：A4 4.727 K、PWL 5.449 K、GP 5.612 K、Physics 5.554 K。
-- A4 在当前强机理先验场景中优于 PWL；PWL 对 GP/Physics 的 Holm 校正后优势证据不足。
-- 弱标签价值主要见于小样本端；G0/G1 仍是开发性证据。
-- 批 21–40 在 S1 解封后已转为开发数据，不能再次作为未见盲测。
+Keeps batches 1–40 data, the v3 baseline, ablations, output alignment, S1 and G0/G1 development tests, and the corresponding configurations and acceptance/analysis scripts. They all belong to the same heat-conduction test line.
 
-入口：[热传导 README](../migration/README.md)、[S1 报告](../migration/reports/迁移后续工作/PWL盲测S1报告.md)、[G0/G1 报告](../migration/reports/迁移后续工作/PWL分层G0G1开发测试报告.md)、[v3 基线卡](../migration/results/heat_v3_qint_min/BASELINE.md)。以上数值引用已有报告，本次范围清理不重算完整实验。
+- S1 @120 RMSE: A4 4.727 K, PWL 5.449 K, GP 5.612 K, Physics 5.554 K.
+- A4 outperforms PWL in the current strong-mechanism-prior scenario; PWL's advantage over GP/Physics after Holm correction is insufficiently supported.
+- Weak-label value appears mainly at the small-sample end; G0/G1 remain development-stage evidence.
+- Batches 21–40 became development data after S1 unblinding and cannot serve as an unseen blind test again.
 
-## 验证
+Entries: [heat-conduction README](../migration/README.md), [S1 report](../migration/reports/迁移后续工作/PWL盲测S1报告.md) (Chinese), [G0/G1 report](../migration/reports/迁移后续工作/PWL分层G0G1开发测试报告.md) (Chinese), [v3 baseline card](../migration/results/heat_v3_qint_min/BASELINE.md). The numbers above cite existing reports; this scope cleanup did not re-run the full experiments.
 
-2026-09-11 范围清理后验证：
+## Verification
 
-| 检查 | 结果 |
+Verification after the 2026-09-11 scope cleanup:
+
+| Check | Result |
 |---|---|
-| 保留的仿真与热传导测试 | 60 项通过 |
-| 独立仿真数值检查 | 30 项通过 |
-| 仿真 smoke | 完成，24 条指标、1920 条预测 |
-| 热传导 smoke | 完成，48 条指标、9600 条预测 |
+| Retained simulation and heat-conduction tests | 60 passed |
+| Independent simulation numerical checks | 30 passed |
+| Simulation smoke | Completed; 24 metrics, 1920 predictions |
+| Heat-conduction smoke | Completed; 48 metrics, 9600 predictions |
 
-两个 smoke 中出现 GP 核参数触及搜索边界的警告，流程正常完成；这不代表所有科学质量锚点通过。历史包含其他场景的测试数量不再用作当前版本的验证数量。
+Both smokes raised warnings about GP kernel parameters hitting search boundaries; the flows completed normally — this does not mean all scientific quality anchors pass. Historical test counts that included other scenarios are no longer used as the current version's verification count.
 
-共享实现与目录职责见 [架构说明](ARCHITECTURE.md)。运行结果、日志和缓存默认不上传，历史图表需在本地运行对应脚本生成。
+For shared implementation and directory responsibilities, see the [architecture notes](ARCHITECTURE.md). Run results, logs, and caches are not uploaded by default; historical figures must be generated locally by running the corresponding scripts.
 
-### 浮点边界修复后的本地验证
+### Local verification after the floating-point boundary fix
 
-GitHub Linux 测试曾得到最大典型相关系数 `1.0000000000000002`，触发严格上界断言。诊断函数现将 QR/SVD 结果限制在理论范围 `[0, 1]`，保留原测试断言，并增加舍入越界与已知夹角测试。本地完整测试结果为 **64 项通过**；本次未在 Linux 上重新运行。
+GitHub Linux tests once produced a maximum canonical correlation of `1.0000000000000002`, tripping the strict upper-bound assertion. The diagnostic function now clamps QR/SVD results to the theoretical range `[0, 1]`, keeps the original test assertions, and adds rounding-overflow and known-angle tests. The full local test result is **64 passed**; this round was not re-run on Linux.
 
-按项目维护要求已移除 `.vscode` 和 `.github/workflows`，保留本地测试命令；本分支不再配置自动 CI。删除工作流不会清除 GitHub 上已有的运行记录。
+Per project maintenance requirements, `.vscode` and `.github/workflows` have been removed and local test commands retained; this branch no longer configures automatic CI. Deleting the workflows does not erase existing run records on GitHub.

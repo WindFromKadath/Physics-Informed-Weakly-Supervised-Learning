@@ -64,8 +64,8 @@ $$
 
 | 部分 | 内容 | 入口 |
 |---|---|---|
-| 论文复现 | PWL 核心、Section IV 三组仿真 | [reproduction/README.md](reproduction/README.md) |
-| 热传导迁移 | 40 批数据、PWL/灰盒/GP 对照、S1 及机制分层 | [migration/README.md](migration/README.md) |
+| 论文复现 | PWL 核心、Section IV 三组仿真 | [reproduction/README.md](reproduction/README.zh-CN.md) |
+| 热传导迁移 | 40 批数据、PWL/灰盒/GP 对照、S1 及机制分层 | [migration/README.md](migration/README.zh-CN.md) |
 
 ## 获取与运行
 
@@ -89,19 +89,19 @@ uv run python migration/run_migration.py --config migration/configs/heat_smoke.y
 - **热传导 S1**：批 21–40 的 @120 RMSE 为 A4 **4.727 K**、PWL **5.449 K**。当前场景中，带强机理先验的灰盒 A4 更合适；PWL 对 GP/Physics 的 Holm 校正后优势证据不足。见 [S1 报告](migration/reports/迁移后续工作/PWL盲测S1报告.md)。
 - **热传导分层测试**：G0/G1 是开发期证据，不能作为新批确认结果。
 
-完整证据、历史基线与后续优先级见 [当前有用内容与后续主线](docs/CURRENT_STATUS.md)。不要将早期“12 档均值最优”推广到包含 A4 的最新对照集合。
+完整证据、历史基线与后续优先级见 [当前有用内容与后续主线](docs/CURRENT_STATUS.zh-CN.md)。不要将早期“12 档均值最优”推广到包含 A4 的最新对照集合。
 
 ## 数据与可复现性
 
-- [热传导数据说明](migration/datasets/README.md)：批 1–20 的规格与来源；批 21–40 的仓内生成器、验收及状态见 [迁移说明](migration/README.md)。
+- [热传导数据说明](migration/datasets/README.md)：批 1–20 的规格与来源；批 21–40 的仓内生成器、验收及状态见 [迁移说明](migration/README.zh-CN.md)。
 - 代码、配置、CSV 输入、验收报告、人工报告及依赖锁进入 Git；运行结果、缓存和日志默认不上传，人工冻结的 [v3 基线卡](migration/results/heat_v3_qint_min/BASELINE.md) 是例外。
 - 历史报告中的 `results/` 图表需要在本地生成；公开仓库并不包含每次历史运行的完整产物。
 
-验证方式：在本地运行两部分测试与独立数值检查，见 [当前状态](docs/CURRENT_STATUS.md)。本分支不配置 GitHub Actions 自动测试。
+验证方式：在本地运行两部分测试与独立数值检查，见 [当前状态](docs/CURRENT_STATUS.zh-CN.md)。本分支不配置 GitHub Actions 自动测试。
 
 ## 文档与反馈
 
-- [架构与扩展接口](docs/ARCHITECTURE.md)
+- [架构与扩展接口](docs/ARCHITECTURE.zh-CN.md)
 - [论文复现技术说明](reproduction/REPRODUCTION.md)
 - [参考材料与论文解析](references/README.md)
 
